@@ -8,7 +8,8 @@ instance/
 htmlcov/
 dist/
 build/
-*.egg-info/# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+*.egg-info/
+.vscode/
 
 # dependencies
 /node_modules
