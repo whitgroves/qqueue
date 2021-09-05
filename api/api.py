@@ -34,7 +34,7 @@ def get_all_products() -> dict:
     """
     products = []
     for i in range(50):
-        product = _mock_product(id=i+1)
+        product = _mock_product(id=i+1)  # product IDs start at 1.
         products.append(product)
 
     return {'products': products} 
@@ -57,7 +57,7 @@ def get_single_product(id:int) -> dict:
                 'image_thumbnail': <str>,
                 'website': <str>
                 'qty': <int>,
-                'price': <str>,  # stored as an <int> in db.
+                'price': <float>,
                 'vendor_id': <int>,
                 'detail': <str>
             }
@@ -76,7 +76,7 @@ def _mock_product(id:int) -> dict:
         'image_thumbnail': 'https://via.placeholder.com/100',
         'website': 'https://github.com/whitgroves',
         'qty': 10,
-        'price': f'${3.5:.02f}',
+        'price': 3.5,
         'vendor_id': 0,
         'detail': 'Lorem ipsum, you all know the drill by now.\
                    Detail about the item goes here.'

@@ -100,7 +100,7 @@ function App() {
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="me-auto"> 
               <Nav.Link href="/market">market</Nav.Link>
-              <Nav.Link href="/cart">cart</Nav.Link>
+              <Nav.Link href="/cart">my cart</Nav.Link>
             </Nav>
           </Navbar.Collapse>
         </Container>
@@ -118,6 +118,7 @@ function App() {
             <Route path="/cart">
               <Cart 
                 cart={cart}
+                cartCount={itemsInCart}
                 addToCart={addToCartHandler}
                 removeFromCart={removeFromCartHandler}
                 removeAllFromCart={removeAllFromCartHandler}
@@ -132,12 +133,12 @@ function App() {
 
       <Navbar className="fixed-bottom" bg="dark" variant="dark">
         <Container>
-          <Navbar.Text>
+          <Navbar.Text className="text-muted">
             The current time is {currentTime}.
           </Navbar.Text>
-          <Navbar.Text>
-            <Container>
-              There are {itemsInCart} items in my cart.
+          <Navbar.Text className="text-muted">
+            <Container >
+              There are {itemsInCart} items in <a href="/cart">my cart</a>.
             </Container>
           </Navbar.Text>
         </Container>

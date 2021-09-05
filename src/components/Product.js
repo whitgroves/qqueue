@@ -64,8 +64,12 @@ export default function Product(props) {
       </Row>
 
       <Row className="py-4">
-        <Col>
-          <Button href="/market">← back to market</Button>
+        <Col md="auto">
+          <Button href="/market" variant="dark">← market</Button>
+        </Col>
+        <Col></Col>
+        <Col md="auto">
+          <Button href="/cart" variant="success">my cart →</Button>
         </Col>
       </Row>
 
