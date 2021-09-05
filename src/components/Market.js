@@ -27,9 +27,9 @@ export default function Market(props) {
                     <Card.Title>{product.name}</Card.Title>
                     <Card.Subtitle>{product.price}</Card.Subtitle>
                     <Card.Text>{product.tagline}</Card.Text>
-                    <Button href={'/product/'+product.id}>view →</Button>{' '}
-                    <Button variant="outline-success" onClick={() => props.addToCart(product.id)}>
-                      +1
+                    <Button variant="outline-dark" size="sm" href={'/product/'+product.id}>view →</Button>{' '}
+                    <Button variant="outline-primary" size="sm" onClick={() => props.addToCart(product.id)}>
+                      add to cart +
                     </Button>
                 </Card.Body>
               </Card>

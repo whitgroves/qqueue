@@ -54,7 +54,7 @@ export default function Product(props) {
 
             <Card.Body className="d-grid">
               <Button onClick={() => props.addToCart(product.id)}>
-                add to cart
+                add to cart +
               </Button>
             </Card.Body>
 
@@ -69,7 +69,7 @@ export default function Product(props) {
         </Col>
         <Col></Col>
         <Col md="auto">
-          <Button href="/cart" variant="success">my cart →</Button>
+          <Button href="/cart" variant="outline-dark">my cart →</Button>
         </Col>
       </Row>
 

@@ -38,6 +38,8 @@ function App() {
   useEffect(() => {
     if (Object.keys(cart).length > 0) {
       setItemsInCart(Object.values(cart).reduce((a, b) => a + b));
+    } else {
+      setItemsInCart(0);
     }
   }, [cart]);
 
@@ -81,8 +83,8 @@ function App() {
 
   const emptyCartHandler = () => {
     const emptyCart = (cartCopy) => {
-      for (var item in cartCopy) {
-        delete cartCopy[item];
+      for (var key in cartCopy) {
+        delete cartCopy[key];
       }
     }
     updateCart(emptyCart);
