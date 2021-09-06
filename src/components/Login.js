@@ -84,7 +84,16 @@ export default function Login(props) {
             </Form.Control.Feedback>
 
             <Form.Text className="text-muted">
-              We can't see this. <a href="https://security.stackexchange.com/q/33860" target="_blank" rel="noreferrer">Learn more.</a>
+            We can't see this.
+              {' '}
+              <a 
+                href="https://security.stackexchange.com/q/33860" 
+                target="_blank" 
+                rel="noreferrer" 
+                tabIndex={-1}
+              >
+                Learn more.
+              </a>
             </Form.Text>
           </Form.Group>
 

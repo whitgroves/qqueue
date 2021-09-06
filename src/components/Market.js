@@ -20,8 +20,8 @@ export default function Market(props) {
     <Container fluid>
       <Row className="gap-4">
           {products.map((product, index) => (
-          <Col>
-              <Card style={{ width: '15rem' }}>
+          <Col key={index}>
+              <Card  style={{ width: '15rem' }}>
                 <Card.Img variant="top" src={product.image_url}/>
                 <Card.Body>
                     <Card.Title>{product.name}</Card.Title>

@@ -1,62 +1,75 @@
-from logging import error
 import time
-from flask import Flask, json, request, redirect, url_for, jsonify
+from flask import Flask, redirect, url_for, jsonify, request
+from flask_login.utils import logout_user
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_login import LoginManager, login_user, current_user
 from flask_cors import CORS, cross_origin
-import sqlalchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 
 # Config
 
 import config
 
-app = Flask(__name__)
-app.config.from_object(config.Config)
+api = Flask(__name__)
+api.config.from_object(config.Config)
+# login = LoginManager(api)
 # CORS(app)  # cross-origin support to enable local POST requests
 
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
+# Database
 
-import models
+db = SQLAlchemy(api)
+migrate = Migrate(api, db)
+import models  # depends on db and login
 
 # Routes
 
-@app.route('/api/time')
+@api.route(f'{config.Config.ROUTE_PREFIX}/time')
 def get_current_time():
     return jsonify({'time': time.time()})
 
-@app.route('/api/products')
+@api.route(f'{config.Config.ROUTE_PREFIX}/products')
 def get_all_products():
     return jsonify(_get_all_products(mock_vol=6))
 
-@app.route('/api/products/<int:id>')
+@api.route(f'{config.Config.ROUTE_PREFIX}/products/<int:id>')
 def get_single_product(id:int):
     return jsonify({'product':_mock_product(id=id)})
 
-@app.route('/api/login', methods=['POST'])
+@api.route(f'{config.Config.ROUTE_PREFIX}/login', methods=['POST'])
 @cross_origin()
 def login():
-    user = _get_user_by_email(request.json['email'])
-    try:
-        assert user
-        assert check_password_hash(
-            user.password_hash, request.json['password']
-        )
-    except Exception as e:
-        return jsonify({
-            'status': 500,
-            'error': 'Username or password was incorrect.'
-        })  
+    if not _is_authenticated(request.json):
+        try:
+            user = _get_user_by_email(request.json['email'])
+            assert user
+            assert check_password_hash(
+                user.password_hash, request.json['password']
+            )
+        except:
+            return jsonify({
+                'status': 500,
+                'error': 'Username or password was incorrect.'
+            })
+
+        # login_user(user)  # has parameter to persist login ('remember me')
         
     return jsonify({
         'status': 200,
-        'token': 'SUPER_SECRET',
-        'message': f'User {user.email} logged in.'
+        'message': 'User is logged in.',
+        'access_token': config.Config.DEV_ACCESS_TOKEN,
+        'refresh_token': config.Config.DEV_REFRESH_TOKEN
     })
 
+@api.route(f'{config.Config.ROUTE_PREFIX}/logout')
+def logout():
+    # logout_user()
+    return jsonify({
+        'status': 200,
+        'message': f'User was logged out.'
+    })
 
-@app.route('/api/register', methods=['POST'])
+@api.route(f'{config.Config.ROUTE_PREFIX}/register', methods=['POST'])
 @cross_origin()
 def register():
     email = request.json['email']
@@ -85,9 +98,11 @@ def register():
         })
     
     return jsonify({
-            'status': 200,
-            'message': f'User {user.email} registered under id {user.id}'
-        })
+        'status': 200,
+        'message': f'User {user.email} registered under id {user.id}',
+        'access_token': config.Config.DEV_ACCESS_TOKEN,
+        'refresh_token': config.Config.DEV_REFRESH_TOKEN
+    })
 
 # Helpers
 
@@ -137,3 +152,24 @@ def _get_user_by_email(email:str) -> models.User:
         return db.session.query(models.User).filter_by(email=email).one()
     except:
         return None
+
+def _is_authenticated(data:dict) -> bool:
+    """
+    Determines whether data contains authentication or refresh tokens.
+    Typically used with request.json.
+
+    Args:
+        data (dict): JSON-like data to check against.
+
+    Returns:
+        bool: Whether the data has a valid auth token.
+    """
+    if 'access_token' in data:
+        if data['access_token'] == config.Config.DEV_ACCESS_TOKEN:
+            return True
+
+    if 'refresh_token' in data:
+        if data['refresh_token'] == config.Config.DEV_REFRESH_TOKEN:
+            return True
+
+    return False

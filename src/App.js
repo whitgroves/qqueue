@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
+import Cookies from 'js-cookie';
 
 // Styles
 
@@ -32,6 +33,7 @@ function App() {
   // Cart
 
   // localStorage is used to persist cart between pages.
+  // TODO: retrieve from a cookie.
   let storedCart = JSON.parse(localStorage.getItem('cart'));
 
   const [cart, setCart] = useState(storedCart ? storedCart : {});
@@ -45,13 +47,12 @@ function App() {
     }
   }, [cart]);
 
-  useEffect(() => {}, [itemsInCart]); // Empty handler to enable updates.
-
   const updateCart = (update) => {
     let hardCopy = { ...cart };
     update(hardCopy);
     setCart(hardCopy);
     // localStorage is used to persist cart between pages.
+    // TODO: store as a cookie.
     localStorage.setItem('cart', JSON.stringify(hardCopy));
   }
 
@@ -93,19 +94,60 @@ function App() {
   }
 
   // Auth
+  const [loggedIn, setLoggedIn] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/login', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        access_token: Cookies.get('access_token')
+      })
+    }).then(res => res.json()).then(data => {
+      onLoginHandler(data);
+    });
+  }, []);  // Only runs once
 
   const onLoginHandler = (data) => {
-    console.log(data);
+    let success = data.status === 200;
+    setLoggedIn(success);
+    if (success) {
+      const expires = (60 * 60) * 1000
+      const inOneHour = new Date(new Date().getTime() + expires)
+      Cookies.set('access_token', data.access_token, { expires: inOneHour})
+    }
   }
 
   const onRegisterHandler = (data) => {
     console.log(data);
   }
 
+  const registerLinks = () => {
+    return (
+      <NavDropdown title="register" id="nav_login_dropdown" bg="dark">
+        <NavDropdown.Item href="/register/customer">customer</NavDropdown.Item>
+        <NavDropdown.Item href="/register/vendor">vendor</NavDropdown.Item>
+      </NavDropdown>
+    );
+  }
+
+  const loginLinks = () => {
+    return (
+      <NavDropdown title="login" id="nav_login_dropdown" bg="dark">
+        <NavDropdown.Item href="/login/customer">customer</NavDropdown.Item>
+        <NavDropdown.Item href="/login/vendor">vendor</NavDropdown.Item>
+      </NavDropdown>
+    );
+  }
+
+  const customerAccountLinks = () => {
+    return <Nav.Link href="/account">my account</Nav.Link>;
+  }
+
   // Render
 
   return (
-    <div id="wrapper" class="d-grid gap-3">
+    <div id="wrapper" className="d-grid gap-3">
 
       <Navbar collapseOnSelect bg="dark" variant="dark" expand="lg" sticky="top">
         <Container>
@@ -124,17 +166,9 @@ function App() {
             <Nav>
 
               <Nav.Link href="/cart">my cart</Nav.Link>
-
-              <NavDropdown title="register" id="nav_login_dropdown" bg="dark">
-                <NavDropdown.Item href="/register/customer">customer</NavDropdown.Item>
-                <NavDropdown.Item href="/register/vendor">vendor</NavDropdown.Item>
-              </NavDropdown>
-
-              <NavDropdown title="login" id="nav_login_dropdown" bg="dark">
-                <NavDropdown.Item href="/login/customer">customer</NavDropdown.Item>
-                <NavDropdown.Item href="/login/vendor">vendor</NavDropdown.Item>
-              </NavDropdown>
-
+              { loggedIn ? '' : registerLinks() }{' '}
+              { loggedIn ? '' : loginLinks() }{' '}
+              { loggedIn ? customerAccountLinks() : '' }
             </Nav>
 
           </Navbar.Collapse>
@@ -181,7 +215,7 @@ function App() {
         </BrowserRouter>
       </Container>
 
-      <div class="py-5"/>  {/* so last row isn't covered by footer */}
+      <div className="py-5"/>  {/* so last row isn't covered by footer */}
 
       <Navbar className="fixed-bottom" bg="dark" variant="dark">
         <Container>
@@ -190,7 +224,12 @@ function App() {
           </Navbar.Text>
           <Navbar.Text className="text-muted">
             <Container >
-              There are {itemsInCart} items in <a href="/cart">my cart</a>.
+              {
+                itemsInCart === 1
+                  ? 'There is 1 item in '
+                  : `There are ${itemsInCart} items in `
+              }
+              <a href="/cart" className="text-muted">my cart</a>.
             </Container>
           </Navbar.Text>
         </Container>

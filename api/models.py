@@ -1,4 +1,5 @@
 import api
+from flask_login import UserMixin
 
 class User(api.db.Model):
     id = api.db.Column(api.db.Integer, primary_key=True)
@@ -7,6 +8,11 @@ class User(api.db.Model):
 
     def __repr__(self):
         return f'<User {self.id}: {self.email}>'
+
+# # allows flask-login to use User as an auth object
+# @api.login.user_loader
+# def load_user(id):
+#     return User.query.get(int(id))
 
 class Product(api.db.Model):
     id = api.db.Column(api.db.Integer, primary_key=True)
