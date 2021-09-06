@@ -13,6 +13,7 @@ import Market from './components/Market';
 import Product from './components/Product';
 import Cart from './components/Cart';
 import Login from './components/Login';
+import Register from './components/Register';
 
 // App
 
@@ -97,6 +98,10 @@ function App() {
     console.log(data);
   }
 
+  const onRegisterHandler = (data) => {
+    console.log(data);
+  }
+
   // Render
 
   return (
@@ -104,21 +109,36 @@ function App() {
 
       <Navbar collapseOnSelect bg="dark" variant="dark" expand="lg" sticky="top">
         <Container>
+
           <Navbar.Brand href="/home">qqueue</Navbar.Brand>
+
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
+
           <Navbar.Collapse id="basic-navbar-nav">
+
             <Nav className="me-auto">
               <Nav.Link href="/market">market</Nav.Link>
               <Nav.Link href="/about">stores</Nav.Link>
             </Nav>
+
             <Nav>
+
               <Nav.Link href="/cart">my cart</Nav.Link>
+
+              <NavDropdown title="register" id="nav_login_dropdown" bg="dark">
+                <NavDropdown.Item href="/register/customer">customer</NavDropdown.Item>
+                <NavDropdown.Item href="/register/vendor">vendor</NavDropdown.Item>
+              </NavDropdown>
+
               <NavDropdown title="login" id="nav_login_dropdown" bg="dark">
                 <NavDropdown.Item href="/login/customer">customer</NavDropdown.Item>
                 <NavDropdown.Item href="/login/vendor">vendor</NavDropdown.Item>
               </NavDropdown>
+
             </Nav>
+
           </Navbar.Collapse>
+
         </Container>
       </Navbar>
       
@@ -148,6 +168,12 @@ function App() {
             <Route path="/login/:loginType">
               <Login 
                 onLogin={onLoginHandler}
+              />
+            </Route>
+
+            <Route path="/register/:registrationType">
+              <Register 
+                onRegister={onRegisterHandler}
               />
             </Route>
 
