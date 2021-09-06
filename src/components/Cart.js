@@ -42,13 +42,6 @@ export default function Cart(props) {
                 {product.name}
               </Col>
 
-              {/* <Col className="d-inline-flex align-items-center" md="auto">
-                <Button variant="outline-primary" href={'/product/'+id}
-                  >← details
-                </Button>
-                <div class="px-1"/>
-              </Col> */}
-
               <Col className="d-inline-flex align-items-center" md="auto">
                 <Badge bg="success" md="auto">${product.price.toFixed(2)}</Badge>
                 <div class="px-1"/>

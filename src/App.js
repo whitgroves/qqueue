@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Route, Switch } from 'react-router-dom';
+import { BrowserRouter, Route, Switch, Redirect,  } from 'react-router-dom';
 import Cookies from 'js-cookie';
 
 // Styles
@@ -95,31 +95,61 @@ function App() {
 
   // Auth
   const [loggedIn, setLoggedIn] = useState(false);
+  const [loggedOut, setLoggedOut] = useState(false);  // it'll make sense trust me
+  const [userEmail, setUserEmail] = useState('');
+  const [userId, setUserId] = useState(0); // There are no users with ID 0.
+
+  // console.log(Cookies.get('qq_access_token'));
 
   useEffect(() => {
-    fetch('/api/login', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        access_token: Cookies.get('access_token')
-      })
-    }).then(res => res.json()).then(data => {
-      onLoginHandler(data);
-    });
-  }, []);  // Only runs once
+    let access_token = Cookies.get('qq_access_token');
+    if (access_token) {
+      fetch('/api/login', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          access_token: access_token,
+          id: Cookies.get('qq_account_id'),
+          email: Cookies.get('qq_account_email')
+        })
+      }).then(res => res.json()).then(data => {
+        onLoginHandler(data);
+      });
+    } else {
+      onLogoutHandler();
+    }
+  }, []);  // Only runs once at render
 
   const onLoginHandler = (data) => {
-    let success = data.status === 200;
+    let success = data.status === 200;  // Huge success
     setLoggedIn(success);
+    setLoggedOut(!success);
+
     if (success) {
-      const expires = (60 * 60) * 1000
-      const inOneHour = new Date(new Date().getTime() + expires)
-      Cookies.set('access_token', data.access_token, { expires: inOneHour})
+      setUserId(data.id);
+      setUserEmail(data.email);
+
+      const expires = (60 * 60) * 1000;
+      const inOneHour = new Date(new Date().getTime() + expires);
+
+      Cookies.set('qq_access_token', data.access_token, { expires: inOneHour });
+      Cookies.set('qq_account_id', data.id, { expires: inOneHour });
+      Cookies.set('qq_account_email', data.email, { expires: inOneHour });
+    } else {
+      console.log(data);
     }
   }
 
-  const onRegisterHandler = (data) => {
-    console.log(data);
+  const onLogoutHandler = () => {
+    setLoggedOut(true);
+    setLoggedIn(false);
+
+    setUserId('');
+    setUserEmail('');
+
+    Cookies.remove('qq_access_token');
+    Cookies.remove('qq_account_id');
+    Cookies.remove('qq_account_email');
   }
 
   const registerLinks = () => {
@@ -135,13 +165,18 @@ function App() {
     return (
       <NavDropdown title="login" id="nav_login_dropdown" bg="dark">
         <NavDropdown.Item href="/login/customer">customer</NavDropdown.Item>
-        <NavDropdown.Item href="/login/vendor">vendor</NavDropdown.Item>
+        <NavDropdown.Item href="/login/vendor" >vendor</NavDropdown.Item>
       </NavDropdown>
     );
   }
 
   const customerAccountLinks = () => {
-    return <Nav.Link href="/account">my account</Nav.Link>;
+    return (
+      <NavDropdown title={userEmail} id="nav_account_dropdown" bg="dark">
+        <NavDropdown.Item href="/account">orders</NavDropdown.Item>
+        <NavDropdown.Item href="/logout" onClick={onLogoutHandler}>logout</NavDropdown.Item>
+      </NavDropdown>
+    );
   }
 
   // Render
@@ -160,14 +195,12 @@ function App() {
 
             <Nav className="me-auto">
               <Nav.Link href="/market">market</Nav.Link>
-              <Nav.Link href="/about">stores</Nav.Link>
+              <Nav.Link href="/cart">my cart</Nav.Link>
             </Nav>
 
             <Nav>
-
-              <Nav.Link href="/cart">my cart</Nav.Link>
-              { loggedIn ? '' : registerLinks() }{' '}
-              { loggedIn ? '' : loginLinks() }{' '}
+              { loggedOut ? registerLinks() : '' }{' '}
+              { loggedOut ? loginLinks() : '' }{' '}
               { loggedIn ? customerAccountLinks() : '' }
             </Nav>
 
@@ -205,9 +238,13 @@ function App() {
               />
             </Route>
 
+            <Route path="/logout">
+              <Redirect to="/home" />
+            </Route>
+
             <Route path="/register/:registrationType">
               <Register 
-                onRegister={onRegisterHandler}
+                onRegister={onLoginHandler}
               />
             </Route>
 
@@ -237,6 +274,7 @@ function App() {
 
     </div>
   );
+
 }
 
 export default App;

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 
 // Styles
 
@@ -10,6 +10,7 @@ import { Card, Col, Row, Button, Form, Badge } from 'react-bootstrap';
 
 export default function Register(props) {
   const { registrationType } = useParams();
+  let history = useHistory();
 
   // Form submission
   const [validated, setValidated] = useState(false);
@@ -37,7 +38,8 @@ export default function Register(props) {
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
           email: email,
-          password: password
+          password: password,
+          isVendor: registrationType.toLowerCase() === 'vendor'
         })
       }).then(res => res.json()).then(data => {
         if ('error' in data) {
@@ -48,6 +50,7 @@ export default function Register(props) {
           setError('');
           setShowError(false);
           props.onRegister(data);
+          history.push('/orders')
         }
       });
     }

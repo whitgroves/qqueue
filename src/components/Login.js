@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 
 // Styles
 
@@ -10,6 +10,7 @@ import { Card, Col, Row, Button, Form, Badge } from 'react-bootstrap';
 
 export default function Login(props) {
   const { loginType } = useParams();
+  let history = useHistory();
 
   // Form submission
   const [validated, setValidated] = useState(false);
@@ -44,6 +45,7 @@ export default function Login(props) {
           setLoginError('');
           setShowLoginError(false);
           props.onLogin(data);
+          history.push('/orders')
         }
       });
     }
@@ -111,7 +113,7 @@ export default function Login(props) {
             <Col></Col> {/* spacer */}
 
             <Col md="auto">
-              <Button variant="outline-primary" type="submit">sign in →</Button>
+              <Button variant="primary" type="submit">sign in →</Button>
             </Col>
           </Row>
 

@@ -3,7 +3,7 @@ from flask import Flask, redirect, url_for, jsonify, request
 from flask_login.utils import logout_user
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask_login import LoginManager, login_user, current_user
+# from flask_login import LoginManager, login_user, current_user
 from flask_cors import CORS, cross_origin
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -39,9 +39,13 @@ def get_single_product(id:int):
 @api.route(f'{config.Config.ROUTE_PREFIX}/login', methods=['POST'])
 @cross_origin()
 def login():
-    if not _is_authenticated(request.json):
+    email = request.json['email']
+    
+    if _is_authenticated(request.json):
+        id = request.json['id']
+    else:
         try:
-            user = _get_user_by_email(request.json['email'])
+            user = _get_user_by_email(email)
             assert user
             assert check_password_hash(
                 user.password_hash, request.json['password']
@@ -51,12 +55,12 @@ def login():
                 'status': 500,
                 'error': 'Username or password was incorrect.'
             })
-
-        # login_user(user)  # has parameter to persist login ('remember me')
+        id = user.id
         
     return jsonify({
         'status': 200,
-        'message': 'User is logged in.',
+        'email': email,
+        'id': id,
         'access_token': config.Config.DEV_ACCESS_TOKEN,
         'refresh_token': config.Config.DEV_REFRESH_TOKEN
     })
@@ -65,30 +69,34 @@ def login():
 def logout():
     # logout_user()
     return jsonify({
-        'status': 200,
-        'message': f'User was logged out.'
+        'status': 200
     })
 
 @api.route(f'{config.Config.ROUTE_PREFIX}/register', methods=['POST'])
 @cross_origin()
 def register():
+    is_vendor = request.json['isVendor']
     email = request.json['email']
+    pw_hash = generate_password_hash(request.json['password'])
+
+    if is_vendor:
+        lookup_fn = _get_vendor_by_email
+        entity = models.Vendor(email=email, password_hash=pw_hash)
+    else:
+        lookup_fn = _get_user_by_email
+        entity = models.User(email=email, password_hash=pw_hash)
 
     # check if email already exists
     try:
-        assert not _get_user_by_email(email)
+        assert not lookup_fn(email)
     except:
         return jsonify({
             'status': 500,
-            'error': 'Email already registered.'
+            'error': 'Email is already registered.'
         })
     
-    user = models.User(
-        email=email, 
-        password_hash=generate_password_hash(request.json['password'])
-    )
     try:
-        db.session.add(user)
+        db.session.add(entity)
         db.session.commit()
     except Exception as e:
         db.session.rollback()
@@ -99,7 +107,8 @@ def register():
     
     return jsonify({
         'status': 200,
-        'message': f'User {user.email} registered under id {user.id}',
+        'email': entity.email,
+        'id': entity.id,
         'access_token': config.Config.DEV_ACCESS_TOKEN,
         'refresh_token': config.Config.DEV_REFRESH_TOKEN
     })
@@ -153,6 +162,12 @@ def _get_user_by_email(email:str) -> models.User:
     except:
         return None
 
+def _get_vendor_by_email(email:str) -> models.Vendor:
+    try:
+        return db.session.query(models.Vendor).filter_by(email=email).one()
+    except:
+        return None
+
 def _is_authenticated(data:dict) -> bool:
     """
     Determines whether data contains authentication or refresh tokens.
@@ -164,6 +179,7 @@ def _is_authenticated(data:dict) -> bool:
     Returns:
         bool: Whether the data has a valid auth token.
     """
+    print(data)
     if 'access_token' in data:
         if data['access_token'] == config.Config.DEV_ACCESS_TOKEN:
             return True

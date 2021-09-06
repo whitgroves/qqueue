@@ -1,5 +1,5 @@
 import api
-from flask_login import UserMixin
+# from flask_login import UserMixin
 
 class User(api.db.Model):
     id = api.db.Column(api.db.Integer, primary_key=True)
@@ -13,6 +13,14 @@ class User(api.db.Model):
 # @api.login.user_loader
 # def load_user(id):
 #     return User.query.get(int(id))
+
+class Vendor(api.db.Model):
+    id = api.db.Column(api.db.Integer, primary_key=True)
+    email = api.db.Column(api.db.String(128), index=True, unique=True)
+    password_hash = api.db.Column(api.db.String(128))
+
+    def __repr__(self):
+        return f'<Vendor {self.id}: {self.email}>'
 
 class Product(api.db.Model):
     id = api.db.Column(api.db.Integer, primary_key=True)

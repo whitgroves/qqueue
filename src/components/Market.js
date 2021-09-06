@@ -27,10 +27,16 @@ export default function Market(props) {
                     <Card.Title>{product.name}</Card.Title>
                     <Card.Subtitle>${product.price ? product.price.toFixed(2) : 0}</Card.Subtitle>
                     <Card.Text>{product.tagline}</Card.Text>
-                    <Button variant="outline-dark" size="sm" href={'/product/'+product.id}>view →</Button>{' '}
-                    <Button variant="outline-primary" size="sm" onClick={() => props.addToCart(product.id)}>
-                      add to cart +
-                    </Button>
+                    <Row>
+                      <Col>
+                        <Button variant="outline-dark" size="sm" href={'/product/'+product.id}>view →</Button>{' '}
+                      </Col>
+                      <Col md="auto">
+                        <Button variant="outline-primary" size="sm" onClick={() => props.addToCart(product.id)}>
+                          add to cart +
+                        </Button>
+                      </Col>
+                    </Row>
                 </Card.Body>
               </Card>
           </Col>
