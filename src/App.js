@@ -5,13 +5,14 @@ import { BrowserRouter, Route, Switch } from 'react-router-dom';
 
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Container, Navbar, Nav } from 'react-bootstrap';
+import { Container, Navbar, Nav, NavDropdown } from 'react-bootstrap';
 
 // Components
 
 import Market from './components/Market';
 import Product from './components/Product';
 import Cart from './components/Cart';
+import Login from './components/Login';
 
 // App
 
@@ -90,6 +91,12 @@ function App() {
     updateCart(emptyCart);
   }
 
+  // Auth
+
+  const onLoginHandler = (data) => {
+    console.log(data);
+  }
+
   // Render
 
   return (
@@ -97,12 +104,19 @@ function App() {
 
       <Navbar collapseOnSelect bg="dark" variant="dark" expand="lg" sticky="top">
         <Container>
-          <Navbar.Brand href="/market">qqueue</Navbar.Brand>
+          <Navbar.Brand href="/home">qqueue</Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
-            <Nav className="me-auto"> 
+            <Nav className="me-auto">
               <Nav.Link href="/market">market</Nav.Link>
+              <Nav.Link href="/about">stores</Nav.Link>
+            </Nav>
+            <Nav>
               <Nav.Link href="/cart">my cart</Nav.Link>
+              <NavDropdown title="login" id="nav_login_dropdown" bg="dark">
+                <NavDropdown.Item href="/login/customer">customer</NavDropdown.Item>
+                <NavDropdown.Item href="/login/vendor">vendor</NavDropdown.Item>
+              </NavDropdown>
             </Nav>
           </Navbar.Collapse>
         </Container>
@@ -111,12 +125,15 @@ function App() {
       <Container>
         <BrowserRouter>
           <Switch>
+
             <Route path="/market">
               <Market addToCart={addToCartHandler}/>
             </Route>
+
             <Route path="/product/:id">
               <Product addToCart={addToCartHandler}/>
             </Route>
+
             <Route path="/cart">
               <Cart 
                 cart={cart}
@@ -127,6 +144,13 @@ function App() {
                 emptyCart={emptyCartHandler}
               />
             </Route>
+
+            <Route path="/login/:loginType">
+              <Login 
+                onLogin={onLoginHandler}
+              />
+            </Route>
+
           </Switch>
         </BrowserRouter>
       </Container>

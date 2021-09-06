@@ -119,7 +119,7 @@ export default function Cart(props) {
               <Col></Col> {/* Spacer column */}
 
               <Col className="d-inline-flex align-items-center" md="auto">
-                <Button variant="success" onClick={() => console.log('checkout')}>
+                <Button variant="success" disabled={cartItems.length === 0} onClick={() => console.log('checkout')}>
                   checkout →
                 </Button>
                 <div class="px-1" />

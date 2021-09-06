@@ -4,7 +4,9 @@ import { useParams } from 'react-router-dom';
 // Styles
 
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Container, Card, Col, Row, Button, ListGroup, ListGroupItem } from 'react-bootstrap';
+import { 
+  Container, Card, Col, Row, Button, ListGroup, ListGroupItem 
+} from 'react-bootstrap';
 
 // Component
 
@@ -40,7 +42,7 @@ export default function Product(props) {
 
             <Card.Body>
               <Card.Title>{product.name}</Card.Title>
-              <Card.Subtitle>{product.price}</Card.Subtitle>
+              <Card.Subtitle>${product.price ? product.price.toFixed(2) : 0}</Card.Subtitle>
               <Card.Text>{product.detail}</Card.Text>
             </Card.Body>
 
@@ -53,7 +55,7 @@ export default function Product(props) {
             </ListGroup>
 
             <Card.Body className="d-grid">
-              <Button onClick={() => props.addToCart(product.id)}>
+              <Button variant="outline-primary" onClick={() => props.addToCart(product.id)}>
                 add to cart +
               </Button>
             </Card.Body>
@@ -65,7 +67,7 @@ export default function Product(props) {
 
       <Row className="py-4">
         <Col md="auto">
-          <Button href="/market" variant="dark">← market</Button>
+          <Button href="/market" variant="outline-dark">← market</Button>
         </Col>
         <Col></Col>
         <Col md="auto">

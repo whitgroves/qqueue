@@ -25,7 +25,7 @@ export default function Market(props) {
                 <Card.Img variant="top" src={product.image_url}/>
                 <Card.Body>
                     <Card.Title>{product.name}</Card.Title>
-                    <Card.Subtitle>{product.price}</Card.Subtitle>
+                    <Card.Subtitle>${product.price ? product.price.toFixed(2) : 0}</Card.Subtitle>
                     <Card.Text>{product.tagline}</Card.Text>
                     <Button variant="outline-dark" size="sm" href={'/product/'+product.id}>view →</Button>{' '}
                     <Button variant="outline-primary" size="sm" onClick={() => props.addToCart(product.id)}>
