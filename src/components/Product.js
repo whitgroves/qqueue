@@ -84,7 +84,7 @@ export default function Product(props) {
         }
         {
           props.isVendor 
-          ? <Button href="/store" variant="outline-dark">my store →</Button> 
+          ? <Button href={`/store/${props.vendorId}`} variant="outline-dark">my store →</Button> 
           : ''
         }
         </Col>

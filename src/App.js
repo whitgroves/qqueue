@@ -15,6 +15,7 @@ import Product from './components/Product';
 import Cart from './components/Cart';
 import Login from './components/Login';
 import Register from './components/Register';
+import Store from './components/Store';
 
 // App
 
@@ -133,6 +134,8 @@ function App() {
       Cookies.set('qq_account_email', data.email, { expires: inOneHour });
 
       Cookies.set('qq_is_vendor', data.is_vendor, { expires: inOneHour });
+
+      emptyCartHandler();  // hack to clear the cart on login.
     } else {
       console.log(data);
     }
@@ -181,6 +184,10 @@ function App() {
     );
   }
 
+  // Store
+
+  const [itemsInStore, setItemsInstore] = useState(0);
+
   // Render
 
   return (
@@ -197,7 +204,6 @@ function App() {
 
             <Nav className="me-auto">
               <Nav.Link href="/market">market</Nav.Link>
-              
             </Nav>
 
             <Nav>
@@ -220,12 +226,16 @@ function App() {
           <Switch>
 
             <Route path="/market">
-              <Market addToCart={addToCartHandler}/>
+              <Market
+                isVendor={isVendor}
+                addToCart={addToCartHandler}
+              />
             </Route>
 
             <Route path="/product/:id">
               <Product
                 isVendor={isVendor}
+                vendorId={isVendor ? userId : 0}
                 addToCart={addToCartHandler}
               />
             </Route>
@@ -242,7 +252,7 @@ function App() {
             </Route>
 
             <Route path="/store/:id">
-              Welcome to {userId}'s store.
+              <Store />
             </Route>
 
             <Route path="/login/:loginType">
@@ -261,6 +271,14 @@ function App() {
               />
             </Route>
 
+
+            <Route path="/404">
+              Looks like you got here by accident. Try one of these:{' '}
+              <a href="/home">home</a>{' '}
+              <a href="/market">market</a>{' '}
+              <a href="/orders">orders</a>{' '}
+            </Route>
+
           </Switch>
         </BrowserRouter>
       </Container>
@@ -275,11 +293,20 @@ function App() {
           <Navbar.Text className="text-muted">
             <Container >
               {
-                itemsInCart === 1
-                  ? 'There is 1 item in '
-                  : `There are ${itemsInCart} items in `
+                isVendor
+                  ? itemsInStore === 1
+                    ? 'There is 1 item in '
+                    : `There are ${itemsInStore} items in `
+                  : itemsInCart === 1
+                    ? 'There is 1 item in '
+                    : `There are ${itemsInCart} items in `
               }
-              <a href="/cart" className="text-muted">my cart</a>.
+              {
+                isVendor
+                  ? <a href={`/store/${userId}`} className="text-muted">my store</a>
+                  : <a href="/cart" className="text-muted">my cart</a>
+              }
+              .
             </Container>
           </Navbar.Text>
         </Container>

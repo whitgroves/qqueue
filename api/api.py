@@ -26,11 +26,11 @@ def get_current_time():
 
 @api.route(f'{config.Config.ROUTE_PREFIX}/products')
 def get_all_products():
-    return jsonify(_get_all_products(mock_vol=6))
+    return jsonify({'products': _get_all_products()})
 
 @api.route(f'{config.Config.ROUTE_PREFIX}/products/<int:id>')
 def get_single_product(id:int):
-    return jsonify({'product':_mock_product(product_id=id)})
+    return jsonify({'product': _mock_product(product_id=id)})
 
 @api.route(f'{config.Config.ROUTE_PREFIX}/login', methods=['POST'])
 @cross_origin()
@@ -116,6 +116,13 @@ def register():
         'refresh_token': config.Config.DEV_REFRESH_TOKEN
     })
 
+@api.route(f'{config.Config.ROUTE_PREFIX}/store/<int:id>')
+def get_vendor_store(id:int):
+    return jsonify({
+        'name': f'Vendor #{id}\'s store',
+        'products': _get_products_by_vendor_id(id)
+    })
+
 # Helpers
 
 def _mock_product(product_id:int) -> dict:
@@ -134,14 +141,14 @@ def _mock_product(product_id:int) -> dict:
                    Detail about the item goes here.'
     }
 
-def _get_all_products(mock_vol=0) -> dict:
+def _get_all_products(mock_vol=10) -> dict:
     products = []
     for i in range(mock_vol):
         product_id = i+1
         product = _mock_product(product_id=product_id)  
         products.append(product)
 
-    return {'products': products} 
+    return products 
 
 def _get_user_by_email(email:str) -> models.User:
     try:
@@ -155,17 +162,15 @@ def _get_vendor_by_email(email:str) -> models.Vendor:
     except:
         return None
 
+def _get_products_by_vendor_id(vendor_id:int) -> list:
+    try:
+        products = _get_all_products()
+        return [p for p in products if p['vendor_id'] == vendor_id]
+        # return db.session.query(models.Product).filter_by(vendor_id=vendor_id)
+    except:
+        return None
+
 def _is_authenticated(data:dict) -> bool:
-    """
-    Determines whether data contains authentication or refresh tokens.
-    Typically used with request.json.
-
-    Args:
-        data (dict): JSON-like data to check against.
-
-    Returns:
-        bool: Whether the data has a valid auth token.
-    """
     if 'access_token' in data:
         if data['access_token'] == config.Config.DEV_ACCESS_TOKEN:
             return True
