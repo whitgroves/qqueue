@@ -99,7 +99,7 @@ function App() {
   const [userEmail, setUserEmail] = useState('');
   const [userId, setUserId] = useState(0); // There are no users with ID 0.
 
-  // console.log(Cookies.get('qq_access_token'));
+  const [isVendor, setIsVendor] = useState(false);
 
   useEffect(() => {
     let access_token = Cookies.get('qq_access_token');
@@ -110,7 +110,8 @@ function App() {
         body: JSON.stringify({
           access_token: access_token,
           id: Cookies.get('qq_account_id'),
-          email: Cookies.get('qq_account_email')
+          email: Cookies.get('qq_account_email'),
+          is_vendor: Cookies.get('qq_is_vendor')
         })
       }).then(res => res.json()).then(data => {
         onLoginHandler(data);
@@ -129,12 +130,16 @@ function App() {
       setUserId(data.id);
       setUserEmail(data.email);
 
+      setIsVendor(data.is_vendor);
+
       const expires = (60 * 60) * 1000;
       const inOneHour = new Date(new Date().getTime() + expires);
 
       Cookies.set('qq_access_token', data.access_token, { expires: inOneHour });
       Cookies.set('qq_account_id', data.id, { expires: inOneHour });
       Cookies.set('qq_account_email', data.email, { expires: inOneHour });
+
+      Cookies.set('qq_is_vendor', data.is_vendor, { expires: inOneHour });
     } else {
       console.log(data);
     }
@@ -144,12 +149,16 @@ function App() {
     setLoggedOut(true);
     setLoggedIn(false);
 
-    setUserId('');
+    setUserId(0);
     setUserEmail('');
+    
+    setIsVendor(false);
 
     Cookies.remove('qq_access_token');
     Cookies.remove('qq_account_id');
     Cookies.remove('qq_account_email');
+
+    Cookies.remove('qq_is_vendor');
   }
 
   const registerLinks = () => {
@@ -195,7 +204,8 @@ function App() {
 
             <Nav className="me-auto">
               <Nav.Link href="/market">market</Nav.Link>
-              <Nav.Link href="/cart">my cart</Nav.Link>
+              { !isVendor ? <Nav.Link href="/cart">my cart</Nav.Link> : '' }
+              { isVendor ? <Nav.Link href={`/store/${userId}`}>my store</Nav.Link> : '' }
             </Nav>
 
             <Nav>
@@ -230,6 +240,10 @@ function App() {
                 removeAllFromCart={removeAllFromCartHandler}
                 emptyCart={emptyCartHandler}
               />
+            </Route>
+
+            <Route path="/store/:id">
+              Welcome to {userId}'s store.
             </Route>
 
             <Route path="/login/:loginType">

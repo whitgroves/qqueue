@@ -39,7 +39,7 @@ export default function Register(props) {
         body: JSON.stringify({
           email: email,
           password: password,
-          isVendor: registrationType.toLowerCase() === 'vendor'
+          is_vendor: registrationType.toLowerCase() === 'vendor'
         })
       }).then(res => res.json()).then(data => {
         if ('error' in data) {

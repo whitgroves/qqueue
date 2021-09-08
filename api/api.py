@@ -1,10 +1,8 @@
 import time
-from flask import Flask, redirect, url_for, jsonify, request
-from flask_login.utils import logout_user
+from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-# from flask_login import LoginManager, login_user, current_user
-from flask_cors import CORS, cross_origin
+from flask_cors import cross_origin
 from werkzeug.security import generate_password_hash, check_password_hash
 
 # Config
@@ -13,14 +11,12 @@ import config
 
 api = Flask(__name__)
 api.config.from_object(config.Config)
-# login = LoginManager(api)
-# CORS(app)  # cross-origin support to enable local POST requests
 
 # Database
 
 db = SQLAlchemy(api)
 migrate = Migrate(api, db)
-import models  # depends on db and login
+import models  # depends on db
 
 # Routes
 
@@ -34,40 +30,46 @@ def get_all_products():
 
 @api.route(f'{config.Config.ROUTE_PREFIX}/products/<int:id>')
 def get_single_product(id:int):
-    return jsonify({'product':_mock_product(id=id)})
+    return jsonify({'product':_mock_product(product_id=id)})
 
 @api.route(f'{config.Config.ROUTE_PREFIX}/login', methods=['POST'])
 @cross_origin()
 def login():
+    is_vendor = request.json['is_vendor']
     email = request.json['email']
     
     if _is_authenticated(request.json):
         id = request.json['id']
     else:
+
+        if is_vendor:
+            entity = _get_vendor_by_email(email)
+        else:
+            entity = _get_user_by_email(email)
+    
         try:
-            user = _get_user_by_email(email)
-            assert user
-            assert check_password_hash(
-                user.password_hash, request.json['password']
-            )
-        except:
+            assert entity
+            assert check_password_hash(entity.password_hash, request.json['password'])
+        except AssertionError:
             return jsonify({
                 'status': 500,
                 'error': 'Username or password was incorrect.'
             })
-        id = user.id
+            
+        id = entity.id
         
     return jsonify({
         'status': 200,
         'email': email,
         'id': id,
-        'access_token': config.Config.DEV_ACCESS_TOKEN,
+        'is_vendor': is_vendor,
+        'access_token': config.Config.DEV_ACCESS_TOKEN,  # TODO: actually generate this
         'refresh_token': config.Config.DEV_REFRESH_TOKEN
     })
 
 @api.route(f'{config.Config.ROUTE_PREFIX}/logout')
 def logout():
-    # logout_user()
+    # TODO: clear user's auth and refresh tokens.
     return jsonify({
         'status': 200
     })
@@ -75,7 +77,7 @@ def logout():
 @api.route(f'{config.Config.ROUTE_PREFIX}/register', methods=['POST'])
 @cross_origin()
 def register():
-    is_vendor = request.json['isVendor']
+    is_vendor = request.json['is_vendor']
     email = request.json['email']
     pw_hash = generate_password_hash(request.json['password'])
 
@@ -109,49 +111,34 @@ def register():
         'status': 200,
         'email': entity.email,
         'id': entity.id,
+        'is_vendor': is_vendor,
         'access_token': config.Config.DEV_ACCESS_TOKEN,
         'refresh_token': config.Config.DEV_REFRESH_TOKEN
     })
 
 # Helpers
 
-def _mock_product(id:int) -> dict:
-    """Returns a mocked instance of a product dict with id = <id>.
-
-    Args:
-        id (int): Sets the id of the mocked product.
-
-    Returns:
-        dict: A product dictionary with placeholder information.
-    """
+def _mock_product(product_id:int) -> dict:
+    vendor_id = product_id % 3 + 1
     return {
-        'id': id,
-        'name': f'Product #{id}',
+        'id': product_id,
+        'name': f'Product #{product_id} by Vendor #{vendor_id}',
         'tagline': 'A fine product.',
         'image_url': 'https://via.placeholder.com/300',
         'image_thumbnail': 'https://via.placeholder.com/100',
         'website': 'https://github.com/whitgroves',
         'qty': 10,
         'price': 3.5,
-        'vendor_id': 0,
+        'vendor_id': vendor_id,
         'detail': 'Lorem ipsum, you all know the drill by now.\
                    Detail about the item goes here.'
     }
 
 def _get_all_products(mock_vol=0) -> dict:
-    """Fetches all products from the database. Will include mocked products
-        if <mock_vol> is set.
-
-    Args:
-        mock_vol (int, optional): The number of mock products to include 
-            in the list. Defaults to 5.
-
-    Returns:
-        dict: A JSON-like dictionary containing a list of product dictionaries.
-    """
     products = []
     for i in range(mock_vol):
-        product = _mock_product(id=i+1)  # product IDs start at 1.
+        product_id = i+1
+        product = _mock_product(product_id=product_id)  
         products.append(product)
 
     return {'products': products} 
@@ -179,7 +166,6 @@ def _is_authenticated(data:dict) -> bool:
     Returns:
         bool: Whether the data has a valid auth token.
     """
-    print(data)
     if 'access_token' in data:
         if data['access_token'] == config.Config.DEV_ACCESS_TOKEN:
             return True

@@ -34,7 +34,8 @@ export default function Login(props) {
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
           email: email,
-          password: password
+          password: password,
+          is_vendor: loginType === 'vendor'
         })
       }).then(res => res.json()).then(data => {
         if ('error' in data) {
