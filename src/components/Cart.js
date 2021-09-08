@@ -123,7 +123,7 @@ export default function Cart(props) {
               </Col>
 
               <Col className="d-inline-flex align-items-center" md="auto">
-                <Button style={{ width: "164px"}} variant="outline-success" disabled>
+                <Button style={{ width: "164px"}} variant="success" disabled>
                   ${cartSubtotal.toFixed(2)}
                 </Button>
               </Col>

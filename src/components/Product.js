@@ -55,9 +55,13 @@ export default function Product(props) {
             </ListGroup>
 
             <Card.Body className="d-grid">
+
+            { props.isVendor ? '' : 
               <Button variant="outline-primary" onClick={() => props.addToCart(product.id)}>
                 add to cart +
               </Button>
+            }
+
             </Card.Body>
 
           </Card>
@@ -69,9 +73,20 @@ export default function Product(props) {
         <Col md="auto">
           <Button href="/market" variant="outline-dark">← market</Button>
         </Col>
+
         <Col></Col>
+
         <Col md="auto">
-          <Button href="/cart" variant="outline-dark">my cart →</Button>
+        { 
+          props.isVendor 
+            ? '' 
+            : <Button href="/cart" variant="outline-dark">my cart →</Button>
+        }
+        {
+          props.isVendor 
+          ? <Button href="/store" variant="outline-dark">my store →</Button> 
+          : ''
+        }
         </Col>
       </Row>
 

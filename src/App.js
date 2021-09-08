@@ -32,10 +32,7 @@ function App() {
 
   // Cart
 
-  // localStorage is used to persist cart between pages.
-  // TODO: retrieve from a cookie.
-  let storedCart = JSON.parse(localStorage.getItem('cart'));
-
+  let storedCart = JSON.parse(Cookies.get('qq_cart'));
   const [cart, setCart] = useState(storedCart ? storedCart : {});
   const [itemsInCart, setItemsInCart] = useState(0);
 
@@ -51,46 +48,42 @@ function App() {
     let hardCopy = { ...cart };
     update(hardCopy);
     setCart(hardCopy);
-    // localStorage is used to persist cart between pages.
-    // TODO: store as a cookie.
-    localStorage.setItem('cart', JSON.stringify(hardCopy));
+
+    // A cookie is used to persist the cart between pages.
+    Cookies.set('qq_cart', JSON.stringify(hardCopy));
   }
 
   const addToCartHandler = (product_id) => {
-    const addToCart = (cartCopy) => {
+    updateCart((cartCopy) => {
       if (product_id in cartCopy) {
         cartCopy[product_id] += 1;
       } else {
         cartCopy[product_id] = 1;
       }
-    }
-    updateCart(addToCart);
+    });
   }
 
   const removeFromCartHandler = (product_id) => {
-    const removeFromCart = (cartCopy) => {
+    updateCart((cartCopy) => {
       cartCopy[product_id] -= 1;
       if (cartCopy[product_id] === 0) {
         delete cartCopy[product_id];
       }
-    }
-    updateCart(removeFromCart);
+    });
   }
 
   const removeAllFromCartHandler = (product_id) => {
-    const removeAllFromCart = (cartCopy) => {
-        delete cartCopy[product_id];
-    }
-    updateCart(removeAllFromCart);
+    updateCart((cartCopy) => {
+      delete cartCopy[product_id];
+    });
   }
 
   const emptyCartHandler = () => {
-    const emptyCart = (cartCopy) => {
+    updateCart((cartCopy) => {
       for (var key in cartCopy) {
         delete cartCopy[key];
       }
-    }
-    updateCart(emptyCart);
+    });
   }
 
   // Auth
@@ -204,11 +197,14 @@ function App() {
 
             <Nav className="me-auto">
               <Nav.Link href="/market">market</Nav.Link>
-              { !isVendor ? <Nav.Link href="/cart">my cart</Nav.Link> : '' }
-              { isVendor ? <Nav.Link href={`/store/${userId}`}>my store</Nav.Link> : '' }
+              
             </Nav>
 
             <Nav>
+              { isVendor ? '' : <Nav.Link href="/cart">cart</Nav.Link> }
+              { isVendor ? <Nav.Link href={`/store/${userId}`}>store</Nav.Link> : '' }
+
+              { loggedIn ? <Nav.Link href="/orders">orders</Nav.Link> : '' }
               { loggedOut ? registerLinks() : '' }{' '}
               { loggedOut ? loginLinks() : '' }{' '}
               { loggedIn ? customerAccountLinks() : '' }
@@ -228,7 +224,10 @@ function App() {
             </Route>
 
             <Route path="/product/:id">
-              <Product addToCart={addToCartHandler}/>
+              <Product
+                isVendor={isVendor}
+                addToCart={addToCartHandler}
+              />
             </Route>
 
             <Route path="/cart">
