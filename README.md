@@ -2,7 +2,7 @@
 
 Navigate to the backend API directory to create your virtual environment and start it:
 
-    $ cd /api
+    $ cd api
     $ py -m venv venv
     $ source venv/Scripts/activate
 
