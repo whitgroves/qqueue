@@ -3,8 +3,8 @@ from flask.wrappers import Response
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import db
-from models import User
 from app.auth import auth
+from app.auth.models import User
 
 
 @auth.route('/register', methods=['POST'])
@@ -25,7 +25,7 @@ def register() -> Response:
         db.session.commit()
 
     except Exception as e:
-        print(f'Exception encountered during registration: {e}')
+        print(f'Exception encountered during registration: {e} -> {error} -> {request.json}')
 
         db.session.rollback()
         print('DB session rolled back successfully.')
@@ -91,6 +91,6 @@ def _create_response(status:int, message:str) -> Response:
     """
     return jsonify({
         'status': status,
-        'request': message
+        'message': message
     })
     

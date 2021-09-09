@@ -22,6 +22,7 @@
     "start-api": "cd api && venv/Scripts/flask run",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "test-api": "cd api && venv/Scripts/activate && py -m unittest tests",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

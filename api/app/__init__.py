@@ -7,7 +7,7 @@ from flask_migrate import Migrate
 db = SQLAlchemy()
 migrate = Migrate()
 
-def create_app(route_root:str='/api/', test_config=None):
+def create_app(test_config=None):
     # print(type(test_config))  # for testing
     app = Flask(__name__, instance_relative_config=True)
 
@@ -22,12 +22,12 @@ def create_app(route_root:str='/api/', test_config=None):
         os.makedirs(app.instance_path)
 
     # sanity check route
-    @app.route(f'{route_root}time')
+    @app.route('/api/time')
     def get_current_time():
         return jsonify({'time': time.time()})
     
     from app.auth import auth
-    app.register_blueprint(auth, url_prefix=f'{route_root}')
+    app.register_blueprint(auth, url_prefix=f'/auth')
 
     db.init_app(app)
     migrate.init_app(app, db)
