@@ -9,30 +9,30 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 import config
 
-api = Flask(__name__)
-api.config.from_object(config.Config)
+app = Flask(__name__)
+app.config.from_object(config.Config)
 
 # Database
 
-db = SQLAlchemy(api)
-migrate = Migrate(api, db)
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 import models  # depends on db
 
 # Routes
 
-@api.route(f'{config.Config.ROUTE_PREFIX}/time')
+@app.route(f'{config.Config.ROUTE_PREFIX}/time')
 def get_current_time():
     return jsonify({'time': time.time()})
 
-@api.route(f'{config.Config.ROUTE_PREFIX}/products')
+@app.route(f'{config.Config.ROUTE_PREFIX}/products')
 def get_all_products():
     return jsonify({'products': _get_all_products()})
 
-@api.route(f'{config.Config.ROUTE_PREFIX}/products/<int:id>')
+@app.route(f'{config.Config.ROUTE_PREFIX}/products/<int:id>')
 def get_single_product(id:int):
     return jsonify({'product': _mock_product(product_id=id)})
 
-@api.route(f'{config.Config.ROUTE_PREFIX}/login', methods=['POST'])
+@app.route(f'{config.Config.ROUTE_PREFIX}/login', methods=['POST'])
 @cross_origin()
 def login():
     is_vendor = request.json['is_vendor']
@@ -67,14 +67,14 @@ def login():
         'refresh_token': config.Config.DEV_REFRESH_TOKEN
     })
 
-@api.route(f'{config.Config.ROUTE_PREFIX}/logout')
+@app.route(f'{config.Config.ROUTE_PREFIX}/logout')
 def logout():
     # TODO: clear user's auth and refresh tokens.
     return jsonify({
         'status': 200
     })
 
-@api.route(f'{config.Config.ROUTE_PREFIX}/register', methods=['POST'])
+@app.route(f'{config.Config.ROUTE_PREFIX}/register', methods=['POST'])
 @cross_origin()
 def register():
     is_vendor = request.json['is_vendor']
@@ -116,7 +116,7 @@ def register():
         'refresh_token': config.Config.DEV_REFRESH_TOKEN
     })
 
-@api.route(f'{config.Config.ROUTE_PREFIX}/store/<int:id>')
+@app.route(f'{config.Config.ROUTE_PREFIX}/store/<int:id>')
 def get_vendor_store(id:int):
     return jsonify({
         'name': f'Vendor #{id}\'s store',

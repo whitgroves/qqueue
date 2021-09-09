@@ -26,11 +26,8 @@ config.set_main_option(
         '%', '%%'))
 target_metadata = current_app.extensions['migrate'].db.metadata
 
-# other values from the config, defined by the needs of env.py,
-# can be acquired:
-# my_important_option = config.get_main_option("my_important_option")
-# ... etc.
-import models  # required to make flask-migrate pick up on model changes
+# LOOK HERE: app-specific imports (yes, these are the droids you're looking for)
+import app.auth.models  # required to make flask-migrate pick up on model changes
 
 
 def run_migrations_offline():
