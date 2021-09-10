@@ -20,9 +20,9 @@
 
 # # Routes
 
-# @app.route(f'{config.Config.ROUTE_PREFIX}/time')
-# def get_current_time():
-#     return jsonify({'time': time.time()})
+# # @app.route(f'{config.Config.ROUTE_PREFIX}/time')
+# # def get_current_time():
+# #     return jsonify({'time': time.time()})
 
 # @app.route(f'{config.Config.ROUTE_PREFIX}/products')
 # def get_all_products():
@@ -32,40 +32,40 @@
 # def get_single_product(id:int):
 #     return jsonify({'product': _mock_product(product_id=id)})
 
-# @app.route(f'{config.Config.ROUTE_PREFIX}/login', methods=['POST'])
-# @cross_origin()
-# def login():
-#     is_vendor = request.json['is_vendor']
-#     email = request.json['email']
+# # @app.route(f'{config.Config.ROUTE_PREFIX}/login', methods=['POST'])
+# # @cross_origin()
+# # def login():
+# #     is_vendor = request.json['is_vendor']
+# #     email = request.json['email']
     
-#     if _is_authenticated(request.json):
-#         id = request.json['id']
-#     else:
+# #     if _is_authenticated(request.json):
+# #         id = request.json['id']
+# #     else:
 
-#         if is_vendor:
-#             entity = _get_vendor_by_email(email)
-#         else:
-#             entity = _get_user_by_email(email)
+# #         if is_vendor:
+# #             entity = _get_vendor_by_email(email)
+# #         else:
+# #             entity = _get_user_by_email(email)
     
-#         try:
-#             assert entity
-#             assert check_password_hash(entity.password_hash, request.json['password'])
-#         except AssertionError:
-#             return jsonify({
-#                 'status': 500,
-#                 'error': 'Username or password was incorrect.'
-#             })
+# #         try:
+# #             assert entity
+# #             assert check_password_hash(entity.password_hash, request.json['password'])
+# #         except AssertionError:
+# #             return jsonify({
+# #                 'status': 500,
+# #                 'error': 'Username or password was incorrect.'
+# #             })
             
-#         id = entity.id
+# #         id = entity.id
         
-#     return jsonify({
-#         'status': 200,
-#         'email': email,
-#         'id': id,
-#         'is_vendor': is_vendor,
-#         'access_token': config.Config.DEV_ACCESS_TOKEN,  # TODO: actually generate this
-#         'refresh_token': config.Config.DEV_REFRESH_TOKEN
-#     })
+# #     return jsonify({
+# #         'status': 200,
+# #         'email': email,
+# #         'id': id,
+# #         'is_vendor': is_vendor,
+# #         'access_token': config.Config.DEV_ACCESS_TOKEN,  # TODO: actually generate this
+# #         'refresh_token': config.Config.DEV_REFRESH_TOKEN
+# #     })
 
 # @app.route(f'{config.Config.ROUTE_PREFIX}/logout')
 # def logout():
@@ -74,47 +74,47 @@
 #         'status': 200
 #     })
 
-# @app.route(f'{config.Config.ROUTE_PREFIX}/register', methods=['POST'])
-# @cross_origin()
-# def register():
-#     is_vendor = request.json['is_vendor']
-#     email = request.json['email']
-#     pw_hash = generate_password_hash(request.json['password'])
+# # @app.route(f'{config.Config.ROUTE_PREFIX}/register', methods=['POST'])
+# # @cross_origin()
+# # def register():
+# #     is_vendor = request.json['is_vendor']
+# #     email = request.json['email']
+# #     pw_hash = generate_password_hash(request.json['password'])
 
-#     if is_vendor:
-#         lookup_fn = _get_vendor_by_email
-#         entity = models.Vendor(email=email, password_hash=pw_hash)
-#     else:
-#         lookup_fn = _get_user_by_email
-#         entity = models.User(email=email, password_hash=pw_hash)
+# #     if is_vendor:
+# #         lookup_fn = _get_vendor_by_email
+# #         entity = models.Vendor(email=email, password_hash=pw_hash)
+# #     else:
+# #         lookup_fn = _get_user_by_email
+# #         entity = models.User(email=email, password_hash=pw_hash)
 
-#     # check if email already exists
-#     try:
-#         assert not lookup_fn(email)
-#     except:
-#         return jsonify({
-#             'status': 500,
-#             'error': 'Email is already registered.'
-#         })
+# #     # check if email already exists
+# #     try:
+# #         assert not lookup_fn(email)
+# #     except:
+# #         return jsonify({
+# #             'status': 500,
+# #             'error': 'Email is already registered.'
+# #         })
     
-#     try:
-#         db.session.add(entity)
-#         db.session.commit()
-#     except Exception as e:
-#         db.session.rollback()
-#         return jsonify({
-#             'status': 500,
-#             'error': e
-#         })
+# #     try:
+# #         db.session.add(entity)
+# #         db.session.commit()
+# #     except Exception as e:
+# #         db.session.rollback()
+# #         return jsonify({
+# #             'status': 500,
+# #             'error': e
+# #         })
     
-#     return jsonify({
-#         'status': 200,
-#         'email': entity.email,
-#         'id': entity.id,
-#         'is_vendor': is_vendor,
-#         'access_token': config.Config.DEV_ACCESS_TOKEN,
-#         'refresh_token': config.Config.DEV_REFRESH_TOKEN
-#     })
+# #     return jsonify({
+# #         'status': 200,
+# #         'email': entity.email,
+# #         'id': entity.id,
+# #         'is_vendor': is_vendor,
+# #         'access_token': config.Config.DEV_ACCESS_TOKEN,
+# #         'refresh_token': config.Config.DEV_REFRESH_TOKEN
+# #     })
 
 # @app.route(f'{config.Config.ROUTE_PREFIX}/store/<int:id>')
 # def get_vendor_store(id:int):
@@ -150,17 +150,17 @@
 
 #     return products 
 
-# def _get_user_by_email(email:str) -> models.User:
-#     try:
-#         return db.session.query(models.User).filter_by(email=email).one()
-#     except:
-#         return None
+# # def _get_user_by_email(email:str) -> models.User:
+# #     try:
+# #         return db.session.query(models.User).filter_by(email=email).one()
+# #     except:
+# #         return None
 
-# def _get_vendor_by_email(email:str) -> models.Vendor:
-#     try:
-#         return db.session.query(models.Vendor).filter_by(email=email).one()
-#     except:
-#         return None
+# # def _get_vendor_by_email(email:str) -> models.Vendor:
+# #     try:
+# #         return db.session.query(models.Vendor).filter_by(email=email).one()
+# #     except:
+# #         return None
 
 # def _get_products_by_vendor_id(vendor_id:int) -> list:
 #     try:
@@ -170,13 +170,13 @@
 #     except:
 #         return None
 
-# def _is_authenticated(data:dict) -> bool:
-#     if 'access_token' in data:
-#         if data['access_token'] == config.Config.DEV_ACCESS_TOKEN:
-#             return True
+# # def _is_authenticated(data:dict) -> bool:
+# #     if 'access_token' in data:
+# #         if data['access_token'] == config.Config.DEV_ACCESS_TOKEN:
+# #             return True
 
-#     if 'refresh_token' in data:
-#         if data['refresh_token'] == config.Config.DEV_REFRESH_TOKEN:
-#             return True
+# #     if 'refresh_token' in data:
+# #         if data['refresh_token'] == config.Config.DEV_REFRESH_TOKEN:
+# #             return True
 
-#     return False
+# #     return False

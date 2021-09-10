@@ -1,5 +1,5 @@
-import time
 import os
+import time
 from flask import Flask, jsonify
 from flask.wrappers import Response
 from flask_sqlalchemy import SQLAlchemy
@@ -27,7 +27,10 @@ def create_app(test_config:object=None) -> Flask:
         return jsonify({'time': time.time()})
     
     from app.auth import auth
-    app.register_blueprint(auth, url_prefix=f'/auth')
+    app.register_blueprint(auth, url_prefix='/auth')
+
+    from app.market import market
+    app.register_blueprint(market, url_prefix='/market')
 
     db.init_app(app)
     migrate.init_app(app, db)

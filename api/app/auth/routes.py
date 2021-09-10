@@ -5,6 +5,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from app import db
 from app.auth import auth
 from app.auth.models import User
+from app.utils.web import create_response
 
 @auth.route('/register', methods=['POST'])
 def register() -> Response:
@@ -19,8 +20,8 @@ def register() -> Response:
         assert not _safe_get_user_by_email(email)
 
         error = 'There was an error while creating the account.'
-        u = User(email=email, password_hash=generate_password_hash(password))
-        db.session.add(u)
+        user = User(email=email, password_hash=generate_password_hash(password))
+        db.session.add(user)
         db.session.commit()
 
     except Exception as e:
@@ -29,9 +30,9 @@ def register() -> Response:
         db.session.rollback()
         print('DB session rolled back successfully.')
 
-        return _create_response(500, error)
+        return create_response(status=500, message=error)
 
-    return _create_response(200, 'User registered successfully.')
+    return create_response(status=200, message='User registered successfully.')
 
 @auth.route('/login', methods=['POST'])
 def login() -> Response:
@@ -43,9 +44,9 @@ def login() -> Response:
         password = request.json['password']
 
         error = 'That username/password pair was incorrect.'
-        u = _safe_get_user_by_email(email)
-        assert u
-        assert check_password_hash(u.password_hash, password)
+        user = _safe_get_user_by_email(email)
+        assert user
+        assert check_password_hash(user.password_hash, password)
 
     except Exception as e:
         print(f'Exception encountered during login: {e}')
@@ -53,9 +54,9 @@ def login() -> Response:
         db.session.rollback()
         print('DB session rolled back successfully.')
 
-        return _create_response(500, error)
+        return create_response(status=500, message=error)
 
-    return _create_response(200, 'User logged in successfully.')
+    return create_response(status=200, message='User logged in successfully.')
 
 def _safe_get_user_by_email(email:str) -> User:
     """
@@ -75,20 +76,3 @@ def _safe_get_user_by_email(email:str) -> User:
         print(f'Failed fetch from database produced this error: {e}')
         None
 
-def _create_response(status:int, message:str) -> Response:
-    """
-    Creates a JSON-like response to send back to the client.
-
-    Args:
-        status (int): The HTTP status of the response.
-        message (str): A message to return to the client.
-
-    Returns:
-        Response: A JSON object containing both <status> and <message>.
-    """
-    return jsonify({
-        'status': status,
-        'message': message
-    })
-    
-    

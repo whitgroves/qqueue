@@ -49,11 +49,12 @@ class AuthTest(TestCase):
             }
 
             # this is not guaranteed to run after register so we must setup a user first
-            u = User(
+            user = User(
+                id=1,
                 email=user_creds['email'],
-                password_hash=generate_password_hash(user_creds['password']
-            ))
-            db.session.add(u)
+                password_hash=generate_password_hash(user_creds['password'])
+            )
+            db.session.add(user)
             db.session.commit()
 
             bad_creds = {**user_creds}  # immutability matters

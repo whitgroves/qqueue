@@ -19,7 +19,9 @@ class AppTest(TestCase):
     def tearDown(self) -> None:
         pass
 
+# endpoint tests
 from tests.test_auth import AuthTest
+from tests.test_market import MarketTest
 
 if __name__ == '__main__':
     unittest.main()
