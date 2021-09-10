@@ -30,6 +30,9 @@ target_metadata = current_app.extensions['migrate'].db.metadata
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
+
+# yes, thes are the droids you're looking for.
+# import models here so they're picked up by the database.
 import app.auth.models
 
 def run_migrations_offline():

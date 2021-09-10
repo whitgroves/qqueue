@@ -1,6 +1,7 @@
 import time
 import os
 from flask import Flask, jsonify
+from flask.wrappers import Response
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 
@@ -22,7 +23,7 @@ def create_app(test_config:object=None) -> Flask:
 
     # sanity check route
     @app.route('/api/time')
-    def get_current_time():
+    def get_current_time() -> Response:
         return jsonify({'time': time.time()})
     
     from app.auth import auth

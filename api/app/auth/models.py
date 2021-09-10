@@ -8,10 +8,6 @@ class User(db.Model):
     username = db.Column(_TEXT_SHORT, index=True, unique=True)
     password_hash = db.Column(_TEXT_SHORT)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<User {self.id}: {self.email}>'
-
-    def __init__(self, email:str, password_hash:str):
-        self.email = email
-        self.password_hash = password_hash
 

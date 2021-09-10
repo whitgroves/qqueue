@@ -6,7 +6,6 @@ from app import db
 from app.auth import auth
 from app.auth.models import User
 
-
 @auth.route('/register', methods=['POST'])
 def register() -> Response:
     error = 'Something went wrong.'
@@ -34,13 +33,12 @@ def register() -> Response:
 
     return _create_response(200, 'User registered successfully.')
 
-
 @auth.route('/login', methods=['POST'])
 def login() -> Response:
     error = 'Something went wrong.'
 
     try:
-        error = 'Headers must include registration data.'
+        error = 'Headers must include login data.'
         email = request.json['email']
         password = request.json['password']
 
@@ -58,7 +56,6 @@ def login() -> Response:
         return _create_response(500, error)
 
     return _create_response(200, 'User logged in successfully.')
-
 
 def _safe_get_user_by_email(email:str) -> User:
     """
@@ -93,4 +90,5 @@ def _create_response(status:int, message:str) -> Response:
         'status': status,
         'message': message
     })
+    
     
