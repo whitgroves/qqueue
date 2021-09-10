@@ -6,6 +6,7 @@ from app.market import market
 from app.market.models import Product
 from app.utils.web import create_response
 
+
 @market.route('/')
 def get_market() -> Response:
     products = [p.to_dict() for p in db.session.query(Product).all()]
