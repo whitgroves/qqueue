@@ -7,15 +7,14 @@ from flask_migrate import Migrate
 db = SQLAlchemy()
 migrate = Migrate()
 
-def create_app(test_config=None):
-    # print(type(test_config))  # for testing
+def create_app(test_config:object=None) -> Flask:
     app = Flask(__name__, instance_relative_config=True)
 
     if test_config is None:
         import config
         app.config.from_object(config.Config)
     else:
-        app.config.from_mapping(test_config)
+        app.config.from_object(test_config)
 
     # make sure the instance folder exists
     if not os.path.exists(app.instance_path):

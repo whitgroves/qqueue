@@ -1,19 +1,20 @@
 import unittest
 from unittest import TestCase
 
+import config
 from app import create_app
 
 class AppTest(TestCase):
     def setUp(self) -> None:
-        self.test_app = create_app({'TESTING': True})
+        self.test_app = create_app(config.TestConfig)
 
     def test_config(self):
-        assert not create_app().testing
-        assert self.test_app.testing
+        self.assertFalse(create_app().testing)
+        self.assertTrue(self.test_app.testing)
 
     def test_time(self):
         with self.test_app.test_client() as client:
-            assert 'time' in client.get('/api/time').json
+            self.assertIn('time', client.get('/api/time').json)
 
     def tearDown(self) -> None:
         pass

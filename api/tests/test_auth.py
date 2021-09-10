@@ -1,24 +1,18 @@
+import os
 import unittest
 from unittest import TestCase
-
 from flask import json
-
+from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine
 
-Session = sessionmaker()  # creates the Session class
-engine = create_engine('sqlite:///')
-
-from app import create_app
-from app.auth.routes import register
+import config
+from app import create_app, db
 
 class AuthTest(TestCase):
+
     def setUp(self) -> None:
-        self.connection = engine.connect()
-        self.transaction = self.connection.begin()  # creates a "non-ORM" transaction
-        self.session = Session(bind=self.connection)
-        
-        self.test_app = create_app({'TESTING': True})
+        self.test_app = create_app(config.TestConfig)
+        db.create_all(app=self.test_app)
         self.user_creds = {
             'email': 'authtest@test.net',
             'password': 'admin'
@@ -28,20 +22,26 @@ class AuthTest(TestCase):
         endpoint = '/auth/register'
         with self.test_app.test_client() as client:
             no_data = client.post(endpoint)
-            assert no_data.json['message'] == 'Headers must include registration data.'
+            self.assertEqual(no_data.json['message'], 'Headers must include registration data.')
             
-            # valid = client.post(
-            #     endpoint, 
-            #     data=json.dumps(self.user_creds),
-            #     content_type='application/json'
-            # )
-            # print(valid.json)
+            valid = client.post(
+                endpoint, 
+                data=json.dumps(self.user_creds),
+                content_type='application/json'
+            )
+            self.assertEqual(valid.json['message'], 'User registered successfully.')
             
+            duplicate = client.post(
+                endpoint, 
+                data=json.dumps(self.user_creds),
+                content_type='application/json'
+            )
+            self.assertEqual(duplicate.json['message'], 'An account is already registered to that email.')
+
 
     def tearDown(self) -> None:
-        self.session.close()
-        self.transaction.rollback()  # rolls back the entire session, even commits
-        self.connection.close()
+        db.drop_all(app=self.test_app)
+
 
 if __name__ == '__main__':
     unittest.main()

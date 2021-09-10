@@ -11,7 +11,7 @@ class User(db.Model):
     def __repr__(self):
         return f'<User {self.id}: {self.email}>'
 
-    def __init__(email:str, password_hash:str):
-        email = email
-        password_hash = password_hash
+    def __init__(self, email:str, password_hash:str):
+        self.email = email
+        self.password_hash = password_hash
 

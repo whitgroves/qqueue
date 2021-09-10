@@ -1,6 +1,15 @@
 import os
 basedir = os.path.abspath(os.path.dirname(__file__))
 
+class TestConfig(object):
+    TESTING = True
+    
+    SQLALCHEMY_DATABASE_URI = os.environ.get('QQ_DATABASE_URL') or \
+        'sqlite:///' + os.path.join(basedir, 'qqtest.db')
+    
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+
 class Config(object):
     """
     A configuration object to store Flask settings. Use with
