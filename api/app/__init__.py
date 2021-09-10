@@ -8,7 +8,8 @@ from flask_migrate import Migrate
 db = SQLAlchemy()
 migrate = Migrate()
 
-def create_app(test_config:object=None) -> Flask:
+
+def create_app(test_config: object = None) -> Flask:
     app = Flask(__name__, instance_relative_config=True)
 
     if test_config is None:
@@ -25,7 +26,7 @@ def create_app(test_config:object=None) -> Flask:
     @app.route('/api/time')
     def get_current_time() -> Response:
         return jsonify({'time': time.time()})
-    
+
     from app.auth import auth
     app.register_blueprint(auth, url_prefix='/auth')
 

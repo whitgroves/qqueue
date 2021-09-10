@@ -4,6 +4,7 @@ from unittest import TestCase
 import config
 from app import create_app
 
+
 class AppTest(TestCase):
     def setUp(self) -> None:
         self.test_app = create_app(config.TestConfig)
@@ -18,6 +19,7 @@ class AppTest(TestCase):
 
     def tearDown(self) -> None:
         pass
+
 
 # endpoint tests
 from tests.test_auth import AuthTest

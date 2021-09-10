@@ -1,5 +1,6 @@
 from app import db
 
+
 class ColType(object):
     text_short = db.String(128)
     text_mid = db.String(256)
@@ -10,10 +11,10 @@ class ColType(object):
 
 
 class Column(object):
-
     @classmethod
     def primary_key(cls) -> db.Column:
-        return db.Column(ColType.number, primary_key=True)  # auto-increments by default
+        return db.Column(ColType.number,
+                         primary_key=True)  # auto-increments by default
 
     @classmethod
     def unique_index(cls) -> db.Column:
@@ -21,5 +22,5 @@ class Column(object):
 
     @classmethod
     def fiat(cls) -> db.Column:
-        return db.Column(db.Numeric(precision=10, scale=2, decimal_return_scale=2))
-
+        return db.Column(
+            db.Numeric(precision=10, scale=2, decimal_return_scale=2))

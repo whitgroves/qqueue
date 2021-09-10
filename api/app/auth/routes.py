@@ -7,10 +7,11 @@ from app.auth import auth
 from app.auth.models import User
 from app.utils.web import create_response
 
+
 @auth.route('/register', methods=['POST'])
 def register() -> Response:
     error = 'Something went wrong.'
-    
+
     try:
         error = 'Headers must include registration data.'
         email = request.json['email']
@@ -20,12 +21,15 @@ def register() -> Response:
         assert not _safe_get_user_by_email(email)
 
         error = 'There was an error while creating the account.'
-        user = User(email=email, password_hash=generate_password_hash(password))
+        user = User(email=email,
+                    password_hash=generate_password_hash(password))
         db.session.add(user)
         db.session.commit()
 
     except Exception as e:
-        print(f'Exception encountered during registration: {e} -> {error} -> {request.json}')
+        print(
+            f'Exception encountered during registration: {e} -> {error} -> {request.json}'
+        )
 
         db.session.rollback()
         print('DB session rolled back successfully.')
@@ -33,6 +37,7 @@ def register() -> Response:
         return create_response(status=500, message=error)
 
     return create_response(status=200, message='User registered successfully.')
+
 
 @auth.route('/login', methods=['POST'])
 def login() -> Response:
@@ -58,7 +63,8 @@ def login() -> Response:
 
     return create_response(status=200, message='User logged in successfully.')
 
-def _safe_get_user_by_email(email:str) -> User:
+
+def _safe_get_user_by_email(email: str) -> User:
     """
     Attempts to retrieve a user account with an email matching <email>.
     Exceptions fail silently and are printed to the console.
@@ -75,4 +81,3 @@ def _safe_get_user_by_email(email:str) -> User:
     except Exception as e:
         print(f'Failed fetch from database produced this error: {e}')
         None
-

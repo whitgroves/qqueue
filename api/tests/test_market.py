@@ -1,7 +1,6 @@
 import config
 import unittest
 from unittest import TestCase
-from flask import json
 from app import create_app, db
 from app.market.models import Product
 

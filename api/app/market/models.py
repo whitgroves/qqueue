@@ -1,9 +1,10 @@
 from app import db
 from app.utils.database import Column, ColType
 
+
 class Product(db.Model):
     __tablename__ = 'products'
-    
+
     id = Column.primary_key()
     name = db.Column(ColType.text_short)
     # tagline = db.Column(ColType.text_mid)
@@ -16,13 +17,13 @@ class Product(db.Model):
     detail = db.Column(ColType.text_long)
 
     def __repr__(self) -> str:
-      return f'<Product {self.id}: {self.name}>'
+        return f'<Product {self.id}: {self.name}>'
 
     def to_dict(self) -> dict:
-      return {
-        'id': self.id,
-        'name': self.name,
-        # 'image_url': self.image_url,
-        # 'price': self.price,
-        # 'detail': self.detail
-      }
+        return {
+            'id': self.id,
+            'name': self.name,
+            # 'image_url': self.image_url,
+            # 'price': self.price,
+            # 'detail': self.detail
+        }
