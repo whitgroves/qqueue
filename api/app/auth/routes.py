@@ -5,7 +5,33 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from app import db
 from app.auth import auth
 from app.auth.models import User
-from app.utils.web import create_response
+from app.utils.web import json_response, dev_token
+
+
+@auth.route('/', methods=['POST'])
+def check_token() -> Response:
+    error = 'Something went wrong.'
+
+    try:
+        error = 'Invalid token.'
+        assert request.json['token'] == dev_token
+
+        error = 'Request must include user data.'
+        user_id = request.json['id']
+
+        error = 'Could not retrieve user information.'
+        user = db.session.query(User).get(int(user_id))
+    except Exception as e:
+        print(
+            f'Exception encountered while checking token: {e} -> {error} -> {request.json}'
+        )
+
+        db.session.rollback()
+        print('DB session rolled back successfully.')
+
+        return json_response(500, error=error)
+
+    return json_response(200, user=user.to_dict())
 
 
 @auth.route('/register', methods=['POST'])
@@ -13,7 +39,7 @@ def register() -> Response:
     error = 'Something went wrong.'
 
     try:
-        error = 'Headers must include registration data.'
+        error = 'Request must include registration data.'
         email = request.json['email']
         password = request.json['password']
 
@@ -34,20 +60,23 @@ def register() -> Response:
         db.session.rollback()
         print('DB session rolled back successfully.')
 
-        return create_response(status=500, message=error)
+        return json_response(500, error=error)
 
-    return create_response(status=200, message='User registered successfully.')
+    return json_response(200,
+                    message='User registered successfully.',
+                    user=user.to_dict(),
+                    token=dev_token)
 
 
 @auth.route('/login', methods=['POST'])
 def login() -> Response:
     error = 'Something went wrong.'
-
+    
     try:
-        error = 'Headers must include login data.'
+        error = 'Request must include login data.'
         email = request.json['email']
         password = request.json['password']
-
+        
         error = 'That username/password pair was incorrect.'
         user = _safe_get_user_by_email(email)
         assert user
@@ -59,9 +88,12 @@ def login() -> Response:
         db.session.rollback()
         print('DB session rolled back successfully.')
 
-        return create_response(status=500, message=error)
+        return json_response(500, error=error)
 
-    return create_response(status=200, message='User logged in successfully.')
+    return json_response(200,
+                    message='User logged in successfully.',
+                    user=user.to_dict(),
+                    token=dev_token)
 
 
 def _safe_get_user_by_email(email: str) -> User:
@@ -74,7 +106,7 @@ def _safe_get_user_by_email(email: str) -> User:
 
     Returns:
         User: A database model of the user account. 
-            Returns None if no match is found.
+              Returns None if no match is found.
     """
     try:
         return db.session.query(User).filter_by(email=email).one()

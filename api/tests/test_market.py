@@ -10,8 +10,7 @@ class MarketTest(TestCase):
         self.test_app = create_app(config.TestConfig)
         db.create_all(app=self.test_app)
 
-    def test_market(self):
-        endpoint = '/market/'
+    def test_buy(self):
         with self.test_app.test_client() as client:
             products = []
             for i in range(1, 11):
@@ -22,9 +21,12 @@ class MarketTest(TestCase):
                 db.session.add_all(products)
                 db.session.commit()
 
-            all_products = client.get(endpoint).json
+            all_products = client.get('/market/').json
             self.assertIn('products', all_products)
             self.assertEqual(10, len(all_products['products']))
+            
+            all_products_dup = client.get('/market/').json
+            self.assertDictEqual(all_products, all_products_dup)
 
     def tearDown(self) -> None:
         db.drop_all(app=self.test_app)

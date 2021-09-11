@@ -23,10 +23,15 @@ export default function Cart(props) {
     });
   }, []); // Remove dependencies so it only loads once.
 
+  // CAUTION: UNTESTED
+  const find_product = (id) => {
+    products.find(p => p.id === parseInt(id));
+  };
+
   const cartItems = [];
   let cartSubtotal = 0.0;
   for (var id in props.cart) {
-    let product = products.find(p => p.id === parseInt(id));
+    let product = find_product(id);
     if (product) {
       let itemSubtotal = product.price * props.cart[id];
       cartItems.push(
@@ -44,9 +49,9 @@ export default function Cart(props) {
 
               <Col className="d-inline-flex align-items-center" md="auto">
                 <Badge bg="success" md="auto">${product.price.toFixed(2)}</Badge>
-                <div class="px-1"/>
+                <div className="px-1"/>
                 <Badge pill bg="secondary" md="auto">x{props.cart[id]}</Badge>
-                <div class="px-2" />
+                <div className="px-2" />
               </Col>
 
               <Col className="d-inline-flex align-items-center" md="auto"> 
@@ -57,12 +62,12 @@ export default function Cart(props) {
                 >
                   +1
                 </Button>
-                <div class="px-1"/>
+                <div className="px-1"/>
 
                 <Button variant="outline-success" disabled>
                   ${itemSubtotal.toFixed(2)}
                 </Button>
-                <div class="px-1"/>
+                <div className="px-1"/>
 
                 <Button
                   variant="outline-danger"
@@ -71,7 +76,7 @@ export default function Cart(props) {
                 >
                   -1
                 </Button>
-                <div class="px-1"/>
+                <div className="px-1"/>
               </Col>
 
               <Col className="d-inline-flex align-items-center" md="auto">
@@ -115,7 +120,7 @@ export default function Cart(props) {
                 <Button variant="success" disabled={cartItems.length === 0} onClick={() => console.log('checkout')}>
                   checkout →
                 </Button>
-                <div class="px-1" />
+                <div className="px-1" />
 
                 <Badge bg="secondary">
                   {props.cartCount} items

@@ -15,9 +15,8 @@ class AuthTest(TestCase):
     def test_register(self):
         endpoint = '/auth/register'
         with self.test_app.test_client() as client:
-            no_data = client.post(endpoint)
-            self.assertEqual(no_data.json['message'],
-                             'Headers must include registration data.')
+            no_data = client.post(endpoint).json
+            self.assertEqual(no_data['status'], 500)
 
             user_creds = {
                 'email': 'test_register@localhost',
@@ -27,21 +26,18 @@ class AuthTest(TestCase):
             valid = client.post(endpoint,
                                 data=json.dumps(user_creds),
                                 content_type='application/json').json
-            self.assertEqual(valid['message'], 'User registered successfully.')
+            self.assertEqual(valid['status'], 200)
 
             duplicate = client.post(endpoint,
                                     data=json.dumps(user_creds),
                                     content_type='application/json').json
-            self.assertEqual(
-                duplicate['message'],
-                'An account is already registered to that email.')
+            self.assertEqual(duplicate['status'], 500)
 
     def test_login(self):
         endpoint = '/auth/login'
         with self.test_app.test_client() as client:
-            no_data = client.post(endpoint)
-            self.assertEqual(no_data.json['message'],
-                             'Headers must include login data.')
+            no_data = client.post(endpoint).json
+            self.assertEqual(no_data['status'], 500)
 
             user_creds = {'email': 'test_login@localhost', 'password': 'admin'}
 
@@ -59,13 +55,13 @@ class AuthTest(TestCase):
             bad_pair = client.post(endpoint,
                                    data=json.dumps(bad_creds),
                                    content_type='application/json').json
-            self.assertEqual(bad_pair['message'],
-                             'That username/password pair was incorrect.')
+            self.assertEqual(bad_pair['status'], 500)
 
             valid = client.post(endpoint,
                                 data=json.dumps(user_creds),
                                 content_type='application/json').json
-            self.assertEqual(valid['message'], 'User logged in successfully.')
+            self.assertEqual(valid['status'], 200)
+            self.assertIn('token', valid)
 
     def tearDown(self) -> None:
         db.drop_all(app=self.test_app)

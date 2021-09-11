@@ -5,16 +5,16 @@ from app.utils.database import Column, ColType
 class Product(db.Model):
     __tablename__ = 'products'
 
-    id = Column.primary_key()
+    id = Column.pk_id()
     name = db.Column(ColType.text_short)
+    detail = db.Column(ColType.text_long)
     # tagline = db.Column(ColType.text_mid)
-    image_url = db.Column(ColType.text_mid)
+    # image_url = db.Column(ColType.text_mid)
     # image_thumbnail = db.Column(ColType.text_mid)
     # website = db.Column(ColType.text_mid)
     # qty = db.Column(ColType.number)
-    price = Column.fiat()
+    # price = Column.fiat()
     # vendor_id = db.Column(ColType.number)
-    detail = db.Column(ColType.text_long)
 
     def __repr__(self) -> str:
         return f'<Product {self.id}: {self.name}>'
@@ -23,7 +23,7 @@ class Product(db.Model):
         return {
             'id': self.id,
             'name': self.name,
+            'detail': self.detail,
             # 'image_url': self.image_url,
-            # 'price': self.price,
-            # 'detail': self.detail
+            # 'price': self.price, 
         }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
 // Styles
 
@@ -22,7 +22,7 @@ export default function ItemCard(props) {
             </Col>
             <Col md="auto">
               {
-                props.isVendor
+                false  // should be a check if user is the item's seller
                   ? ''
                   : 
                     <Button variant="outline-primary" size="sm" onClick={() => props.addToCart(product.id)}>

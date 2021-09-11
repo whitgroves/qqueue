@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Route, Switch, Redirect,  } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { BrowserRouter, Route, Switch, Redirect, } from 'react-router-dom';
 import Cookies from 'js-cookie';
 
 // Styles
@@ -13,9 +13,7 @@ import { Container, Navbar, Nav, NavDropdown } from 'react-bootstrap';
 import Market from './components/Market';
 import Product from './components/Product';
 import Cart from './components/Cart';
-import Login from './components/Login';
-import Register from './components/Register';
-import Store from './components/Store';
+import AuthCard from './components/AuthCard';
 
 // App
 
@@ -31,9 +29,9 @@ function App() {
     });
   }, []); // Empty dependencies so it doesn't constantly reload.
 
-  // Cart
+  // Cart TODO: move this logic into Cart.js
 
-  let storedCart = JSON.parse(Cookies.get('qq_cart'));
+  let storedCart = Cookies.get('qq_cart');
   const [cart, setCart] = useState(storedCart ? storedCart : {});
   const [itemsInCart, setItemsInCart] = useState(0);
 
@@ -61,7 +59,7 @@ function App() {
       } else {
         cartCopy[product_id] = 1;
       }
-    });
+    })
   }
 
   const removeFromCartHandler = (product_id) => {
@@ -88,105 +86,59 @@ function App() {
   }
 
   // Auth
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [loggedOut, setLoggedOut] = useState(false);  // it'll make sense trust me
-  const [userEmail, setUserEmail] = useState('');
-  const [userId, setUserId] = useState(0); // There are no users with ID 0.
 
-  const [isVendor, setIsVendor] = useState(false);
+  let storedToken = Cookies.get('qq_token');
+  let storedId = Cookies.get('qq_user_id');
+  let storedEmail = Cookies.get('qq_user_email');
+
+  const [token, setToken] = useState(storedToken ? storedToken : '');
+  const [userId, setUserId] = useState(storedId ? parseInt(storedId) : 0); // There are no users with ID 0.
+  const [userEmail, setUserEmail] = useState(storedEmail ? storedEmail : '');
+
+  const [loggedIn, setLoggedIn] = useState(token !== '');
+
+  const onAuthHandler = useCallback((data) => {
+    setLoggedIn(true);
+
+    if (data && data.token) {
+      setToken(data.token);
+      setUserId(data.user.id);
+      setUserEmail(data.user.email);
+
+      const inOneHour = new Date(new Date().getTime() + (60 * 60) * 1000);
+
+      Cookies.set('qq_token', data.token, { expires: inOneHour });
+      Cookies.set('qq_user_id', data.user.id, { expires: inOneHour });
+      Cookies.set('qq_user_email', data.user.email, { expires: inOneHour });
+    }
+  }, []);
 
   useEffect(() => {
-    let access_token = Cookies.get('qq_access_token');
-    if (access_token) {
-      fetch('/api/login', {
+    if (token && userId > 0) {
+      fetch('/auth/login', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          access_token: access_token,
-          id: Cookies.get('qq_account_id'),
-          email: Cookies.get('qq_account_email'),
-          is_vendor: Cookies.get('qq_is_vendor')
+          token: token,
+          id: userId,
         })
-      }).then(res => res.json()).then(data => {
-        onLoginHandler(data);
-      });
-    } else {
-      onLogoutHandler();
+      }).then(res => res.json()).then(data => onAuthHandler(data));
     }
-  }, []);  // Only runs once at render
-
-  const onLoginHandler = (data) => {
-    let success = data.status === 200;  // Huge success
-    setLoggedIn(success);
-    setLoggedOut(!success);
-
-    if (success) {
-      setUserId(data.id);
-      setUserEmail(data.email);
-
-      setIsVendor(data.is_vendor);
-
-      const expires = (60 * 60) * 1000;
-      const inOneHour = new Date(new Date().getTime() + expires);
-
-      Cookies.set('qq_access_token', data.access_token, { expires: inOneHour });
-      Cookies.set('qq_account_id', data.id, { expires: inOneHour });
-      Cookies.set('qq_account_email', data.email, { expires: inOneHour });
-
-      Cookies.set('qq_is_vendor', data.is_vendor, { expires: inOneHour });
-
-      emptyCartHandler();  // hack to clear the cart on login.
-    } else {
-      console.log(data);
-    }
-  }
+  }, [token, userId, onAuthHandler]);
 
   const onLogoutHandler = () => {
-    setLoggedOut(true);
     setLoggedIn(false);
 
+    setToken('');
     setUserId(0);
     setUserEmail('');
-    
-    setIsVendor(false);
 
-    Cookies.remove('qq_access_token');
-    Cookies.remove('qq_account_id');
-    Cookies.remove('qq_account_email');
+    Cookies.remove('qq_token');
+    Cookies.remove('qq_user_id');
+    Cookies.remove('qq_user_email');
 
-    Cookies.remove('qq_is_vendor');
+    Cookies.remove('qq_cart');  // clear the cart on logout
   }
-
-  const registerLinks = () => {
-    return (
-      <NavDropdown title="register" id="nav_login_dropdown" bg="dark">
-        <NavDropdown.Item href="/register/customer">customer</NavDropdown.Item>
-        <NavDropdown.Item href="/register/vendor">vendor</NavDropdown.Item>
-      </NavDropdown>
-    );
-  }
-
-  const loginLinks = () => {
-    return (
-      <NavDropdown title="login" id="nav_login_dropdown" bg="dark">
-        <NavDropdown.Item href="/login/customer">customer</NavDropdown.Item>
-        <NavDropdown.Item href="/login/vendor" >vendor</NavDropdown.Item>
-      </NavDropdown>
-    );
-  }
-
-  const customerAccountLinks = () => {
-    return (
-      <NavDropdown title={userEmail} id="nav_account_dropdown" bg="dark">
-        <NavDropdown.Item href="/account">orders</NavDropdown.Item>
-        <NavDropdown.Item href="/logout" onClick={onLogoutHandler}>logout</NavDropdown.Item>
-      </NavDropdown>
-    );
-  }
-
-  // Store
-
-  const [itemsInStore, setItemsInstore] = useState(0);
 
   // Render
 
@@ -204,44 +156,53 @@ function App() {
 
             <Nav className="me-auto">
               <Nav.Link href="/market">market</Nav.Link>
+              {loggedIn ? <Nav.Link href="/orders">orders</Nav.Link> : ''}
             </Nav>
 
             <Nav>
-              { isVendor ? '' : <Nav.Link href="/cart">cart</Nav.Link> }
-              { isVendor ? <Nav.Link href={`/store/${userId}`}>store</Nav.Link> : '' }
-
-              { loggedIn ? <Nav.Link href="/orders">orders</Nav.Link> : '' }
-              { loggedOut ? registerLinks() : '' }{' '}
-              { loggedOut ? loginLinks() : '' }{' '}
-              { loggedIn ? customerAccountLinks() : '' }
+              {loggedIn ? '' : <Nav.Link href="/register">register</Nav.Link>}
+              {loggedIn ? '' : <Nav.Link href="/login">login</Nav.Link>}
+              {loggedIn ? <Nav.Link href="/cart">cart</Nav.Link> : ''}
+              {
+                loggedIn
+                  ?
+                  <NavDropdown title={userEmail} id="nav-account-dropdown" >
+                    <NavDropdown.Item href="/account">account</NavDropdown.Item>
+                    <NavDropdown.Divider />
+                    <NavDropdown.Item href="/logout" onClick={onLogoutHandler}>
+                      logout
+                    </NavDropdown.Item>
+                  </NavDropdown>
+                  : ''
+              }
             </Nav>
 
           </Navbar.Collapse>
 
         </Container>
       </Navbar>
-      
+
       <Container>
         <BrowserRouter>
           <Switch>
 
             <Route path="/market">
               <Market
-                isVendor={isVendor}
+                isVendor={false}
                 addToCart={addToCartHandler}
               />
             </Route>
 
             <Route path="/product/:id">
               <Product
-                isVendor={isVendor}
-                vendorId={isVendor ? userId : 0}
+                isVendor={false}
+                vendorId={userId}
                 addToCart={addToCartHandler}
               />
             </Route>
 
             <Route path="/cart">
-              <Cart 
+              <Cart
                 cart={cart}
                 cartCount={itemsInCart}
                 addToCart={addToCartHandler}
@@ -251,26 +212,23 @@ function App() {
               />
             </Route>
 
-            <Route path="/store/:id">
-              <Store />
+            <Route path="/register">
+              <AuthCard
+                isRegistration={true}
+                onAuthenticated={onAuthHandler}
+              />
             </Route>
 
-            <Route path="/login/:loginType">
-              <Login 
-                onLogin={onLoginHandler}
+            <Route path="/login">
+              <AuthCard
+                isRegistration={false}
+                onAuthenticated={onAuthHandler}
               />
             </Route>
 
             <Route path="/logout">
               <Redirect to="/home" />
             </Route>
-
-            <Route path="/register/:registrationType">
-              <Register 
-                onRegister={onLoginHandler}
-              />
-            </Route>
-
 
             <Route path="/404">
               Looks like you got here by accident. Try one of these:{' '}
@@ -283,7 +241,7 @@ function App() {
         </BrowserRouter>
       </Container>
 
-      <div className="py-5"/>  {/* so last row isn't covered by footer */}
+      <div className="py-5" />  {/* so last row isn't covered by footer */}
 
       <Navbar className="fixed-bottom" bg="dark" variant="dark">
         <Container>
@@ -293,20 +251,11 @@ function App() {
           <Navbar.Text className="text-muted">
             <Container >
               {
-                isVendor
-                  ? itemsInStore === 1
-                    ? 'There is 1 item in '
-                    : `There are ${itemsInStore} items in `
-                  : itemsInCart === 1
-                    ? 'There is 1 item in '
-                    : `There are ${itemsInCart} items in `
+                itemsInCart === 1
+                  ? 'There is 1 item in my '
+                  : `There are ${itemsInCart} items in my `
               }
-              {
-                isVendor
-                  ? <a href={`/store/${userId}`} className="text-muted">my store</a>
-                  : <a href="/cart" className="text-muted">my cart</a>
-              }
-              .
+              <a href="/cart" className="text-muted">cart</a>.
             </Container>
           </Navbar.Text>
         </Container>
