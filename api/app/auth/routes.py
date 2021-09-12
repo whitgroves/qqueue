@@ -21,6 +21,7 @@ def check_token() -> Response:
 
         error = 'Could not retrieve user information.'
         user = db.session.query(User).get(int(user_id))
+        
     except Exception as e:
         print(
             f'Exception encountered while checking token: {e} -> {error} -> {request.json}'
@@ -31,7 +32,10 @@ def check_token() -> Response:
 
         return json_response(500, error=error)
 
-    return json_response(200, user=user.to_dict())
+    return json_response(200,
+                         message='User authenticated with server.',
+                         user=user.to_dict(),
+                         token=dev_token)
 
 
 @auth.route('/register', methods=['POST'])
@@ -63,20 +67,20 @@ def register() -> Response:
         return json_response(500, error=error)
 
     return json_response(200,
-                    message='User registered successfully.',
-                    user=user.to_dict(),
-                    token=dev_token)
+                         message='User registered successfully.',
+                         user=user.to_dict(),
+                         token=dev_token)
 
 
 @auth.route('/login', methods=['POST'])
 def login() -> Response:
     error = 'Something went wrong.'
-    
+
     try:
         error = 'Request must include login data.'
         email = request.json['email']
         password = request.json['password']
-        
+
         error = 'That username/password pair was incorrect.'
         user = _safe_get_user_by_email(email)
         assert user
@@ -91,9 +95,9 @@ def login() -> Response:
         return json_response(500, error=error)
 
     return json_response(200,
-                    message='User logged in successfully.',
-                    user=user.to_dict(),
-                    token=dev_token)
+                         message='User logged in successfully.',
+                         user=user.to_dict(),
+                         token=dev_token)
 
 
 def _safe_get_user_by_email(email: str) -> User:

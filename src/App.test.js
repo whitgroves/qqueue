@@ -1,8 +1,51 @@
 import { render, screen } from '@testing-library/react';
 import App from './App';
 
-test('renders learn react link', () => {
+test('renders time element', () => {
   render(<App />);
-  const linkElement = screen.getByText(/current time/i);
-  expect(linkElement).toBeInTheDocument();
+
+  const timeElement = screen.getByText(/The current time is/i);
+  expect(timeElement).toBeInTheDocument();
+});
+
+test('renders navigation links while signed out', () => {
+  render(<App />);
+
+  const marketLink = screen.getByText(/market/i);
+  expect(marketLink).toBeInTheDocument();
+
+  const cartLink = screen.getByTestId('nav-link-cart');
+  expect(cartLink).toBeInTheDocument();
+
+  const registerLink = screen.getByText(/register/i);
+  expect(registerLink).toBeInTheDocument();
+
+  const loginLink = screen.getByText(/login/i);
+  expect(loginLink).toBeInTheDocument();
+});
+
+test('renders the app container while signed in', () => {
+  let testUser = {
+    id: 1,
+    email: 'AppTest@test.net'
+  }
+
+  render(
+    <App
+      testToken={'halfbaked'}
+      testUser={ testUser }
+    />
+  );
+
+  const marketLink = screen.getByText(/market/i);
+  expect(marketLink).toBeInTheDocument();
+
+  const ordersLink = screen.getByText(/orders/i);
+  expect(ordersLink).toBeInTheDocument();
+
+  const cartLink = screen.getByTestId('nav-link-cart');
+  expect(cartLink).toBeInTheDocument();
+  
+  const userDropdown = screen.getByText(testUser.email);
+  expect(userDropdown).toBeInTheDocument();
 });

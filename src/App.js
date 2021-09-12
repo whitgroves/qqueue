@@ -17,7 +17,7 @@ import AuthCard from './components/AuthCard';
 
 // App
 
-function App() {
+function App(props) {
 
   // Time
 
@@ -87,9 +87,9 @@ function App() {
 
   // Auth
 
-  let storedToken = Cookies.get('qq_token');
-  let storedId = Cookies.get('qq_user_id');
-  let storedEmail = Cookies.get('qq_user_email');
+  let storedToken = props.testToken ? props.testToken : Cookies.get('qq_token');
+  let storedId = props.testUser ? props.testUser.id : Cookies.get('qq_user_id');
+  let storedEmail = props.testUser ? props.testUser.email : Cookies.get('qq_user_email');
 
   const [token, setToken] = useState(storedToken ? storedToken : '');
   const [userId, setUserId] = useState(storedId ? parseInt(storedId) : 0); // There are no users with ID 0.
@@ -160,9 +160,9 @@ function App() {
             </Nav>
 
             <Nav>
-              {loggedIn ? '' : <Nav.Link href="/register">register</Nav.Link>}
+              <Nav.Link href="/cart" data-testid="nav-link-cart">cart</Nav.Link>
               {loggedIn ? '' : <Nav.Link href="/login">login</Nav.Link>}
-              {loggedIn ? <Nav.Link href="/cart">cart</Nav.Link> : ''}
+              {loggedIn ? '' : <Nav.Link href="/register">register</Nav.Link>}
               {
                 loggedIn
                   ?
