@@ -1,5 +1,5 @@
-import { render, screen } from '@testing-library/react'
-import AuthCard from './AuthCard'
+import { render, screen } from '@testing-library/react';
+import AuthCard from './AuthCard';
 
 test('renders as login', () => {
   render(

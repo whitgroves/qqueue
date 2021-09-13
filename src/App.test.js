@@ -32,7 +32,7 @@ test('renders the app container while signed in', () => {
 
   render(
     <App
-      testToken={'doesntMatter'}  // client doesn't care about the token value, just that it receieves one 
+      testToken={'doesntMatter'}  // client doesn't care about the token value, just that it has one 
       testUser={testUser}
     />
   );
@@ -42,6 +42,9 @@ test('renders the app container while signed in', () => {
 
   const ordersLink = screen.getByText(/orders/i);
   expect(ordersLink).toBeInTheDocument();
+
+  const sellLink = screen.getByText(/sell/i);
+  expect(sellLink).toBeInTheDocument();
 
   const cartLink = screen.getByTestId('nav-link-cart');
   expect(cartLink).toBeInTheDocument();

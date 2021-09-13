@@ -116,5 +116,5 @@ def _safe_get_user_by_email(email: str) -> User:
     try:
         return db.session.query(User).filter_by(email=email).one()
     except Exception as e:
-        print(f'Failed fetch from database produced this error: {e}')
-        None
+        print(f'Failed User lookup produced this error: {e}')
+        return None

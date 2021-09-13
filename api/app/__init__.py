@@ -30,8 +30,8 @@ def create_app(test_config: object = None) -> Flask:
     from app.auth import auth
     app.register_blueprint(auth, url_prefix='/auth')
 
-    from app.market import market
-    app.register_blueprint(market, url_prefix='/market')
+    from app.products import products
+    app.register_blueprint(products, url_prefix='/products')
 
     db.init_app(app)
     migrate.init_app(app, db)

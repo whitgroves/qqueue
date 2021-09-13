@@ -11,6 +11,7 @@ import { Container, Navbar, Nav, NavDropdown } from 'react-bootstrap';
 // Components
 
 import Market from './components/Market';
+import Sell from './components/Sell';
 import Product from './components/Product';
 import Cart from './components/Cart';
 import AuthCard from './components/AuthCard';
@@ -157,6 +158,7 @@ function App(props) {
             <Nav className="me-auto">
               <Nav.Link href="/market">market</Nav.Link>
               {loggedIn ? <Nav.Link href="/orders">orders</Nav.Link> : ''}
+              {loggedIn ? <Nav.Link href="/sell">sell</Nav.Link> : ''}
             </Nav>
 
             <Nav>
@@ -188,8 +190,13 @@ function App(props) {
 
             <Route path="/market">
               <Market
-                isVendor={false}
                 addToCart={addToCartHandler}
+              />
+            </Route>
+
+            <Route path="/sell">
+              <Sell 
+                // userId={userId}
               />
             </Route>
 

@@ -23,7 +23,7 @@ class AppTest(TestCase):
 
 # endpoint tests
 from tests.test_auth import AuthTest
-from tests.test_market import MarketTest
+from tests.test_products import ProductsTest
 
 if __name__ == '__main__':
     unittest.main()

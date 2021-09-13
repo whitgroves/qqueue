@@ -9,11 +9,13 @@ import { Card, Col, Row, Button, Form, Badge } from 'react-bootstrap';
 // Component
 
 export default function AuthCard(props) {
+
   let history = useHistory();
 
   const isRegistration = props.isRegistration ? props.isRegistration : false;
 
-  // Form submission
+  // Form validation
+
   const [validated, setValidated] = useState(false);
   const [showError, setShowError] = useState(false);
   const [error, setError] = useState('');
@@ -68,8 +70,11 @@ export default function AuthCard(props) {
           }
         });
       }
+
     }
+
     setValidated(true);
+
   }
 
   // Render

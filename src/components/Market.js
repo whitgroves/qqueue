@@ -24,7 +24,7 @@ export default function Market(props) {
           <Col key={index}>
             <ItemCard
               product={product}
-              isVendor={false}
+              addToCart={props.addToCart}
             />
           </Col>
           ))}
