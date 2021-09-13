@@ -45,8 +45,7 @@ export default function AuthCard(props) {
 
       if (form.checkValidity() === false) {
         event.stopPropagation();
-      }
-      else {
+      } else {
         let email = event.target.email.value;
         let endpoint = isRegistration ? '/auth/register' : '/auth/login';
 

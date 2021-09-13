@@ -15,6 +15,7 @@ class AuthTest(TestCase):
 
     def test_check_token(self) -> None:
         endpoint = '/auth/'
+
         with self.test_app.test_client() as client:
             # no empty requests
             no_data = client.post(endpoint).json
@@ -53,7 +54,7 @@ class AuthTest(TestCase):
                                 valid_creds['password']))
                 db.session.add(user)
                 db.session.commit()
-                
+
             valid = client.post(endpoint,
                                 data=json.dumps(valid_auth),
                                 content_type='application/json').json
@@ -61,8 +62,8 @@ class AuthTest(TestCase):
 
     def test_register(self) -> None:
         endpoint = '/auth/register'
-        with self.test_app.test_client() as client:
 
+        with self.test_app.test_client() as client:
             # no empty requests
             no_data = client.post(endpoint).json
             self.assertEqual(no_data['status'], 500)
@@ -85,8 +86,8 @@ class AuthTest(TestCase):
 
     def test_login(self) -> None:
         endpoint = '/auth/login'
-        with self.test_app.test_client() as client:
 
+        with self.test_app.test_client() as client:
             # no empty requests
             no_data = client.post(endpoint).json
             self.assertEqual(no_data['status'], 500)
@@ -130,7 +131,7 @@ class AuthTest(TestCase):
                                 password_hash=unhashed_creds['password'])
                 db.session.add(unhashed)
                 db.session.commit()
-                
+
             wrong_pass = client.post(endpoint,
                                      data=json.dumps(unhashed_creds),
                                      content_type='application/json').json
