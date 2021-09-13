@@ -5,7 +5,7 @@ import { useParams } from 'react-router-dom';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {
-  Container, Card, Col, Row, Button, ListGroup, ListGroupItem
+  Container, Card, Col, Row, Button, //ListGroup, ListGroupItem
 } from 'react-bootstrap';
 
 // Component
@@ -21,7 +21,9 @@ export default function Product(props) {
       setProduct(data.product);
       setCanEdit(data.product.seller_id === props.userId);
     });
-  }, [id]);
+  }, [id, props.userId]);
+
+  let imageUrl = product && product.image_url ? product.image_url : 'https://via.placeholder.com/300';
 
   return (
     <Container>
@@ -30,10 +32,17 @@ export default function Product(props) {
 
         <Col md="auto">
           <Card>
-            <Card.Img variant="top" src={product.image_url} />
-            <Card.Body>
-              <Card.Text>{product.tagline}</Card.Text>
-            </Card.Body>
+            <Card.Img variant="top" src={imageUrl} />
+            {
+              product && product.tagline
+                ?
+                <Card.Body>
+                  <Card.Text>
+                    {product.tagline}
+                  </Card.Text>
+                </Card.Body>
+                : ''
+            }
           </Card>
         </Col>
 
@@ -44,27 +53,29 @@ export default function Product(props) {
 
             <Card.Body>
               <Card.Title data-testid="product-name">{product.name}</Card.Title>
-              <Card.Subtitle>${product.price ? product.price.toFixed(2) : 0}</Card.Subtitle>
-              <Card.Text>{product.detail}</Card.Text>
-            </Card.Body>
-
-            <ListGroup className="list-group-flush">
-              <ListGroupItem>
-                <a href={product.website} target="_blank" rel="noreferrer">Product Website</a>
-              </ListGroupItem>
-              <ListGroupItem>Rating</ListGroupItem>
-              <ListGroupItem>{product.qty} available</ListGroupItem>
-            </ListGroup>
-
-            <Card.Body className="d-grid">
-
-              {props.isVendor ? '' :
-                <Button variant="outline-primary" onClick={() => props.addToCart(product.id)}>
-                  add to cart +
-                </Button>
+              {
+                product && product.price
+                  ? <Card.Subtitle>${product.price.toFixed(2)}</Card.Subtitle>
+                  : ''
               }
 
+              {
+                product && product.detail
+                  ? <Card.Text>{product.detail}</Card.Text>
+                  : ''
+              }
             </Card.Body>
+
+            {
+              canEdit
+                ? 'seller actions go here'
+                :
+                <Card.Body className="d-grid">
+                  <Button variant="outline-primary" onClick={() => props.addToCart(product.id)}>
+                    add to cart +
+                  </Button>
+                </Card.Body>
+            }
 
           </Card>
         </Col>
