@@ -4,13 +4,13 @@ from unittest import TestCase
 from flask import json
 from app import create_app, db
 from app.products.models import Product
+from app.auth.models import User
 
 
 class ProductsTest(TestCase):
     def setUp(self) -> None:
         self.test_app = create_app(config.TestConfig)
         self.mock_product_name = 'Test Product'
-        self.mock_product_detail = 'A fine product.'
         db.create_all(app=self.test_app)
 
     def test_all(self):
@@ -20,13 +20,11 @@ class ProductsTest(TestCase):
             # populate db with products to test against
             with self.test_app.app_context():
                 products = []
-                
+
                 for i in range(1, 11):
-                    product = Product(id=i,
-                                      name=self.mock_product_name,
-                                      detail=self.mock_product_detail)
+                    product = Product(id=i, name=self.mock_product_name)
                     products.append(product)
-                    
+
                 db.session.add_all(products)
                 db.session.commit()
 
@@ -50,9 +48,7 @@ class ProductsTest(TestCase):
 
             # can successfully get a product from the database
             with self.test_app.app_context():
-                product = Product(id=id,
-                                  name=self.mock_product_name,
-                                  detail=self.mock_product_detail)
+                product = Product(id=id, name=self.mock_product_name)
                 db.session.add(product)
                 db.session.commit()
 
@@ -64,33 +60,45 @@ class ProductsTest(TestCase):
             product_data = valid['product']
             self.assertEqual(product_data['id'], id)
             self.assertEqual(product_data['name'], self.mock_product_name)
-            self.assertEqual(product_data['detail'], self.mock_product_detail)
 
     def test_sell(self):
         endpoint = '/products/sell'
-        
+
         with self.test_app.test_client() as client:
             # no empty requests
             no_data = client.post(endpoint).json
             self.assertEqual(no_data['status'], 500)
-            
-            # valid request is accepted by server
-            valid_product = {
-                'name': self.mock_product_name,
-                'detail': self.mock_product_detail
-            }
+
+            # request with just a product name will fail
+            name_only = {'name': self.mock_product_name}
+            no_seller = client.post(endpoint,
+                                    data=json.dumps(name_only),
+                                    content_type='application/json').json
+            self.assertEqual(no_seller['status'], 500)
+
+            # seller id must belong to registered user
+            valid_product = {'name': self.mock_product_name, 'seller_id': 1}
+            unregistered = client.post(endpoint,
+                                       data=json.dumps(valid_product),
+                                       content_type='application/json').json
+            self.assertEqual(unregistered['status'], 500)
+
+            # request with product name and registered seller ID is accepted
+            with self.test_app.app_context():
+                user = User(id=1)  # just id is needed
+                db.session.add(user)
+                db.session.commit()
             valid = client.post(endpoint,
                                 data=json.dumps(valid_product),
                                 content_type='application/json').json
             self.assertEqual(valid['status'], 200)
-            
+
             # response includes correct product data
             self.assertIn('product', valid)
             product_data = valid['product']
             self.assertIn('id', product_data)  # just check we got one back
             self.assertEqual(product_data['name'], self.mock_product_name)
-            self.assertEqual(product_data['detail'], self.mock_product_detail)
-            
+
             # confirm product was added to the db
             with self.test_app.app_context():
                 in_db = db.session.query(Product).get(product_data['id'])

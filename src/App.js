@@ -196,14 +196,13 @@ function App(props) {
 
             <Route path="/sell">
               <Sell 
-                // userId={userId}
+                userId={userId}
               />
             </Route>
 
             <Route path="/product/:id">
               <Product
-                isVendor={false}
-                vendorId={userId}
+                userId={userId}
                 addToCart={addToCartHandler}
               />
             </Route>

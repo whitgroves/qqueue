@@ -4,8 +4,8 @@ import { useParams } from 'react-router-dom';
 // Styles
 
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { 
-  Container, Card, Col, Row, Button, ListGroup, ListGroupItem 
+import {
+  Container, Card, Col, Row, Button, ListGroup, ListGroupItem
 } from 'react-bootstrap';
 
 // Component
@@ -14,10 +14,12 @@ export default function Product(props) {
   const { id } = useParams();
 
   const [product, setProduct] = useState({});
+  const [canEdit, setCanEdit] = useState(false);
 
   useEffect(() => {
-    fetch('/api/products/'+id).then(res => res.json()).then(data => {
+    fetch('/products/' + id).then(res => res.json()).then(data => {
       setProduct(data.product);
+      setCanEdit(data.product.seller_id === props.userId);
     });
   }, [id]);
 
@@ -28,20 +30,20 @@ export default function Product(props) {
 
         <Col md="auto">
           <Card>
-            <Card.Img variant="top" src={product.image_url}/>
+            <Card.Img variant="top" src={product.image_url} />
             <Card.Body>
-                <Card.Text>{product.tagline}</Card.Text>
+              <Card.Text>{product.tagline}</Card.Text>
             </Card.Body>
           </Card>
         </Col>
 
         <Col>
           <Card>
-            
+
             <Card.Header>Details</Card.Header>
 
             <Card.Body>
-              <Card.Title>{product.name}</Card.Title>
+              <Card.Title data-testid="product-name">{product.name}</Card.Title>
               <Card.Subtitle>${product.price ? product.price.toFixed(2) : 0}</Card.Subtitle>
               <Card.Text>{product.detail}</Card.Text>
             </Card.Body>
@@ -56,11 +58,11 @@ export default function Product(props) {
 
             <Card.Body className="d-grid">
 
-            { props.isVendor ? '' : 
-              <Button variant="outline-primary" onClick={() => props.addToCart(product.id)}>
-                add to cart +
-              </Button>
-            }
+              {props.isVendor ? '' :
+                <Button variant="outline-primary" onClick={() => props.addToCart(product.id)}>
+                  add to cart +
+                </Button>
+              }
 
             </Card.Body>
 
@@ -77,16 +79,16 @@ export default function Product(props) {
         <Col></Col>
 
         <Col md="auto">
-        { 
-          props.isVendor 
-            ? '' 
-            : <Button href="/cart" variant="outline-dark">my cart →</Button>
-        }
-        {
-          props.isVendor 
-          ? <Button href={`/store/${props.vendorId}`} variant="outline-dark">my store →</Button> 
-          : ''
-        }
+          {
+            props.isVendor
+              ? ''
+              : <Button href="/cart" variant="outline-dark">my cart →</Button>
+          }
+          {
+            props.isVendor
+              ? <Button href={`/store/${props.vendorId}`} variant="outline-dark">my store →</Button>
+              : ''
+          }
         </Col>
       </Row>
 

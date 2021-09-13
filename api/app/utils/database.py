@@ -1,57 +1,63 @@
-from app import db
+from decimal import Decimal
+from typing import Any, Optional
+from sqlalchemy import Column, String, Integer
+from sqlalchemy.types import TypeDecorator
+
+
+class Currency(TypeDecorator):
+    """
+            Converts Decimals from Python to Integers in Sqlite.
+            Used to guarantee precision when storing monetary values in the db.
+            """
+    impl = Integer
+
+    def __init__(self, scale: int = 2):
+        TypeDecorator.__init__(self)
+        self.scale = scale
+        self.scale_multiplier = 10**self.scale  # used to scale from dec to int
+
+    def process_bind_param(self, value: Optional[Any],
+                           dialect: Any) -> Optional[Any]:
+        if value is not None:
+            value = int(Decimal(value) * self.scale_multiplier)
+        return value
+
+    def process_result_value(self, value: Optional[Any],
+                             dialect: Any) -> Optional[Any]:
+        if value is not None:
+            value = Decimal(value) / self.scale_multiplier
+        return value
 
 
 class ColType(object):
     """
-    Class to store constants for commonly used SQLAlchemy column types.
-    Do not instantiate.
-    """
-    text_short = db.String(128)
-    text_mid = db.String(256)
-    text_long = db.String(512)
-    number = db.Integer
-    # for safekeeping:
-    # https://docs.sqlalchemy.org/en/14/core/type_basics.html?highlight=integer#generic-types
-
-
-class Column(object):
-    """
-    Class to generate specifically-configured, commonly-used SQLAlchemy columns.
-    Do not instantiate.
-    """
+    Class to fetch commonly used SQLAlchemy column configurations. Do not instantiate.
     
-    @classmethod
-    def pk_id(cls) -> db.Column:
-        """
-        Creates a primary key column for auto-incrementing numbers.
+    Reference:
+        https://docs.sqlalchemy.org/en/14/core/type_basics.html?highlight=integer#generic-types
+    """
 
-        Returns:
-            db.Column: The id column.
-        """
-        return db.Column(ColType.number,
-                         primary_key=True)  # auto-increments by default
+    text_short = String(128)
+    text_mid = String(256)
+    text_long = String(512)
+    fiat = Currency()
 
     @classmethod
-    def unique_index(cls, col_type: ColType = ColType.text_short) -> db.Column:
+    def pk_id(cls) -> Column:
         """
-        Creates an indexed column with a UNIQUE constraint.
-
-        Args:
-            col_type (ColType, optional): The type of the column. 
-                                          Defaults to ColType.text_short.
+        Creates a PRIMARY KEY column that auto-increments by default.
 
         Returns:
-            db.Column: The generated column.
+            Column: An INT column configured as a primary key.
         """
-        return db.Column(col_type, unique=True, index=True)
+        return Column(Integer, primary_key=True)
 
     @classmethod
-    def fiat(cls) -> db.Column:
+    def unique_index(cls) -> Column:
         """
-        Creates a column formatted to store fiat currency.
-
+        Creates an indexed TEXT column with a UNIQUE constraint.
+        
         Returns:
-            db.Column: The generated column.
+            Column: A TEXT column configured as a unique index.
         """
-        return db.Column(
-            db.Numeric(precision=10, scale=2, decimal_return_scale=2))
+        return Column(ColType.text_short, unique=True, index=True)

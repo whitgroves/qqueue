@@ -8,7 +8,7 @@ import { Card, Form, Row, Col, Badge, Button } from 'react-bootstrap';
 
 // Component
 
-export default function Sell() {
+export default function Sell(props) {
   let history = useHistory();
 
   // Form validation
@@ -39,6 +39,7 @@ export default function Sell() {
         body: JSON.stringify({
           name: name,
           detail: detail,
+          seller_id: props.userId,
         })
       }).then(res => res.json()).then(data => {
 
