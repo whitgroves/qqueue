@@ -32,8 +32,8 @@ test('renders the app container while signed in', () => {
 
   render(
     <App
-      testToken={'halfbaked'}
-      testUser={ testUser }
+      testToken={'doesntMatter'}  // client doesn't care about the token value, just that it receieves one 
+      testUser={testUser}
     />
   );
 
@@ -45,7 +45,7 @@ test('renders the app container while signed in', () => {
 
   const cartLink = screen.getByTestId('nav-link-cart');
   expect(cartLink).toBeInTheDocument();
-  
+
   const userDropdown = screen.getByText(testUser.email);
   expect(userDropdown).toBeInTheDocument();
 });

@@ -13,7 +13,7 @@ def check_token() -> Response:
     error = 'Something went wrong.'
 
     try:
-        error = 'Invalid token.'
+        error = 'Missing or invalid token.'
         assert request.json['token'] == dev_token
 
         error = 'Request must include user data.'
@@ -21,6 +21,7 @@ def check_token() -> Response:
 
         error = 'Could not retrieve user information.'
         user = db.session.query(User).get(int(user_id))
+        assert user
         
     except Exception as e:
         print(
