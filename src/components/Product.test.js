@@ -1,61 +1,20 @@
-import { render, screen, waitFor } from '@testing-library/react';
-import { createMemoryHistory } from 'history';
-import { Router, Route, useParams, MemoryRouter } from 'react-router-dom';
-import { act } from 'react-dom/test-utils';
-
+import React from "react";
+import { render, screen } from "@testing-library/react";
+import { Route, MemoryRouter } from "react-router-dom";
 import Product from './Product';
 
-function renderWithProviders(
-  ui,
-  {
-    route = '/',
-    params = '/',
-    history = createMemoryHistory({ initialEntries: [route] }),
-  } = {}
-) {
-  console.log("route:", route) // see below
-  console.log("params:", params) // see below
-  return {
-    ...render(
-      <Router history={history}>
-        <Route path={params}>
-          {ui}
-        </Route>
-      </Router>
-    ),
-    history,
-  };
-}
+const testProduct = { id: 1, name: 'Test Product', seller_id: 1 }
 
-test('renders product data', async () => {
+test('renders product name', () => {
+  render(
+    <MemoryRouter initialEntries={['/product/1']}>
+      <Route path='/product/:id'>
+        <Product product={testProduct} />
+      </Route>
+    </MemoryRouter>
+  );
 
-  let testProduct = { 'id': 1, 'name': 'Test Product' }
-
-  const { findByTestId } = renderWithProviders(<Product product={testProduct} />, {
-    route: '/product/1',
-    params: '/product/:id',
-  })
-
-  const name = await waitFor(() => findByTestId('product-name'));
-
-  expect(name).toHaveTextContent(testProduct.name);
-
+  const nameElement = screen.getByTestId('product-name');
+  expect(nameElement).toBeInTheDocument();
+  expect(nameElement.textContent).toEqual(testProduct.name);
 });
-
-// const routerParams = { useParams }
-
-// jest.spyOn(routerParams, 'useParams').mockReturnValue({ id: 1 });
-
-// test('renders product data', () => {
-
-//   let testProduct = { 'id': 1, 'name': 'Test Product' }
-
-//   render(
-//     <Product product={testProduct} /> , { wrapper: MemoryRouter }
-//   );
-
-//   const nameElement = screen.getByTestId('product-name');
-//   expect(nameElement).toBeInTheDocument();
-//   expect(nameElement.innerText).toEqual(testProduct.name);
-
-// });

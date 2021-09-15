@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 
 // Styles
 
@@ -11,17 +11,24 @@ import {
 // Component
 
 export default function Product(props) {
-  const { id } = useParams();
+  let history = useHistory();
 
-  const [product, setProduct] = useState({});
+  const { id } = useParams();
+  const { userId } = props;
+
+  const [product, setProduct] = useState(props.product ? props.product : {});
   const [canEdit, setCanEdit] = useState(false);
 
   useEffect(() => {
     fetch('/products/' + id).then(res => res.json()).then(data => {
-      setProduct(data.product);
-      setCanEdit(data.product.seller_id === props.userId);
+      if (data.status === 200) {
+        setProduct(data.product);
+        setCanEdit(data.product.seller_id === userId);
+      } else {
+        history.push('/market');  // redirect to market if id not in database
+      }
     });
-  }, [id, props.userId]);
+  }, [id, userId, history]);
 
   let imageUrl = product && product.image_url ? product.image_url : 'https://via.placeholder.com/300';
 
@@ -90,16 +97,7 @@ export default function Product(props) {
         <Col></Col>
 
         <Col md="auto">
-          {
-            props.isVendor
-              ? ''
-              : <Button href="/cart" variant="outline-dark">my cart →</Button>
-          }
-          {
-            props.isVendor
-              ? <Button href={`/store/${props.vendorId}`} variant="outline-dark">my store →</Button>
-              : ''
-          }
+          <Button href="/cart" variant="outline-dark">my cart →</Button>
         </Col>
       </Row>
 
