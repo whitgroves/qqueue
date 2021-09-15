@@ -16,16 +16,15 @@ export default function Cart(props) {
 
   useEffect(() => {
     // product catalog fetched to reference details
-    // TODO: store the product information in props.cart
-    // OR cache the product list in the db so it's not expensive to fetch
-    fetch('/api/products').then(res => res.json()).then(data => {
+    // TODO: just fetch the specific items needed
+    fetch('/products/').then(res => res.json()).then(data => {
       setProducts(data.products);
     });
   }, []); // Remove dependencies so it only loads once.
 
   // CAUTION: UNTESTED
   const find_product = (id) => {
-    products.find(p => p.id === parseInt(id));
+    return products.find(p => p.id === parseInt(id));
   };
 
   const cartItems = [];

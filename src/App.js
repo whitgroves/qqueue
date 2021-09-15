@@ -30,10 +30,10 @@ function App(props) {
     });
   }, []); // Empty dependencies so it doesn't constantly reload.
 
-  // Cart TODO: move this logic into Cart.js
+  // Cart 
 
   let storedCart = Cookies.get('qq_cart');
-  const [cart, setCart] = useState(storedCart ? storedCart : {});
+  const [cart, setCart] = useState(storedCart ? JSON.parse(storedCart) : {});
   const [itemsInCart, setItemsInCart] = useState(0);
 
   useEffect(() => {

@@ -1,5 +1,6 @@
 from flask import request
 from flask.wrappers import Response
+from flask_cors import cross_origin
 
 from app import db
 from app.products import products
@@ -8,9 +9,9 @@ from app.utils.web import json_response
 
 
 @products.route('/')
+@cross_origin()
 def all() -> Response:
     products = [p.to_dict() for p in db.session.query(Product).all()]
-    print(products)
     return json_response(200, products=products)
 
 
@@ -42,7 +43,7 @@ def sell() -> Response:
         # required fields
         error = 'Request must include product name.'
         name = request.json['name']
-        
+
         error = 'Request must include seller id.'
         seller_id = request.json['seller_id']
 

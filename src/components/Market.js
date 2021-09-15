@@ -13,7 +13,6 @@ export default function Market(props) {
 
   useEffect(() => {
     fetch('/products/').then(res => res.json()).then(data => {
-      console.log(data);
       setProducts(data.products);
     });
   }, []); // Remove dependencies so it only loads once.
