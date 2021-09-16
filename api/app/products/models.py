@@ -11,6 +11,7 @@ class Product(db.Model):
     tagline = db.Column(ColType.text_mid)
     image_url = db.Column(ColType.text_mid)
     price = db.Column(ColType.fiat)
+    is_active = db.Column(db.Boolean)
 
     seller_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 

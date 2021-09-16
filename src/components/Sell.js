@@ -26,6 +26,7 @@ export default function Sell(props) {
     event.preventDefault();
 
     let name = event.target.name.value;
+    let price = event.target.price.value;
     let detail = event.target.detail.value;
 
     const form = event.currentTarget;
@@ -38,6 +39,7 @@ export default function Sell(props) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: name,
+          price: parseFloat(price),
           detail: detail,
           seller_id: props.userId,
         })
@@ -47,7 +49,7 @@ export default function Sell(props) {
           setError(data['error']);
         } else {
           setError('');
-          history.push(`/market/${data['product']['id']}`);
+          history.push(`/product/${data['product']['id']}`);
         }
 
       })
@@ -64,14 +66,21 @@ export default function Sell(props) {
         <Form noValidate validated={validated} onSubmit={handleSubmit}>
 
           <Form.Group controlId="name" data-testid="sell-card-name">
-            <Form.Label>product name</Form.Label>
+            <Form.Label>name</Form.Label>
             <Form.Control placeholder="spaceley's sprockets" required />
           </Form.Group>
 
           <div className="py-2" />
 
+          <Form.Group controlId="price" data-testid="sell-card-price">
+            <Form.Label>price (USD)</Form.Label>
+            <Form.Control placeholder="3.50" required />
+          </Form.Group>
+
+          <div className="py-2" />
+
           <Form.Group controlId="detail" data-testid="sell-card-detail">
-            <Form.Label>product detail</Form.Label>
+            <Form.Label>detail</Form.Label>
             <Form.Control as="textarea" placeholder="tell me more..." />
           </Form.Group>
 

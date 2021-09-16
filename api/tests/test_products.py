@@ -11,6 +11,8 @@ class ProductsTest(TestCase):
     def setUp(self) -> None:
         self.test_app = create_app(config.TestConfig)
         self.mock_product_name = 'Test Product'
+        self.mock_product_price = 3.50
+        self.mock_product_seller_id = 1
         db.create_all(app=self.test_app)
 
     def test_all(self):
@@ -38,17 +40,19 @@ class ProductsTest(TestCase):
             self.assertDictEqual(all_products_dup, all_products)
 
     def test_one(self):
-        id = 1
-        endpoint = f'/products/{id}'
-
         with self.test_app.test_client() as client:
+            id = 1
+            endpoint = f'/products/{id}'
+
             # can only get products in the database
             nonexistent = client.get(endpoint).json
             self.assertEqual(nonexistent['status'], 500)
 
             # can successfully get a product from the database
             with self.test_app.app_context():
-                product = Product(id=id, name=self.mock_product_name)
+                product = Product(id=id,
+                                  name=self.mock_product_name,
+                                  is_active=True)
                 db.session.add(product)
                 db.session.commit()
 
@@ -61,6 +65,20 @@ class ProductsTest(TestCase):
             self.assertEqual(product_data['id'], id)
             self.assertEqual(product_data['name'], self.mock_product_name)
 
+            # cannot get an inactive product from the database
+            id = 2
+            endpoint = f'/products/{id}'
+
+            with self.test_app.app_context():
+                inactive = Product(id=id,
+                                   name=self.mock_product_name,
+                                   is_active=False)
+                db.session.add(inactive)
+                db.session.commit()
+
+            invalid = client.get(endpoint).json
+            self.assertEqual(invalid['status'], 500)
+
     def test_sell(self):
         endpoint = '/products/sell'
 
@@ -69,21 +87,48 @@ class ProductsTest(TestCase):
             no_data = client.post(endpoint).json
             self.assertEqual(no_data['status'], 500)
 
-            # request with just a product name will fail
-            name_only = {'name': self.mock_product_name}
+            # request with no name will fail
+            no_name_product = {
+                'price': self.mock_product_price,
+                'seller_id': self.mock_product_seller_id
+            }
+            no_name = client.post(endpoint,
+                                  data=json.dumps(no_name_product),
+                                  content_type='application/json').json
+            self.assertEqual(no_name['status'], 500)
+
+            # request with no price will fail
+            no_price_product = {
+                'name': self.mock_product_name,
+                'seller_id': self.mock_product_seller_id
+            }
+            no_price = client.post(endpoint,
+                                   data=json.dumps(no_price_product),
+                                   content_type='application/json').json
+            self.assertEqual(no_price['status'], 500)
+
+            # request with no seller id will fail
+            no_seller_product = {
+                'name': self.mock_product_name,
+                'price': self.mock_product_price
+            }
             no_seller = client.post(endpoint,
-                                    data=json.dumps(name_only),
+                                    data=json.dumps(no_seller_product),
                                     content_type='application/json').json
             self.assertEqual(no_seller['status'], 500)
 
             # seller id must belong to registered user
-            valid_product = {'name': self.mock_product_name, 'seller_id': 1}
+            valid_product = {
+                'name': self.mock_product_name,
+                'price': 3.50,
+                'seller_id': 1
+            }
             unregistered = client.post(endpoint,
                                        data=json.dumps(valid_product),
                                        content_type='application/json').json
             self.assertEqual(unregistered['status'], 500)
 
-            # request with product name and registered seller ID is accepted
+            # request with product name, price, and registered seller ID is accepted
             with self.test_app.app_context():
                 user = User(id=1)  # just id is needed
                 db.session.add(user)

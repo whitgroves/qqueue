@@ -25,7 +25,7 @@ def one(id: int) -> Response:
         assert product
 
     except Exception as e:
-        print(f'Exception encountered during login: {e}')
+        print(f'Exception encountered while fetching a product: {e}')
 
         db.session.rollback()
         print('DB session rolled back successfully.')
@@ -43,6 +43,9 @@ def sell() -> Response:
         # required fields
         error = 'Request must include product name.'
         name = request.json['name']
+        
+        error = 'Request must include product price.'
+        price = request.json['price']
 
         error = 'Request must include seller id.'
         seller_id = request.json['seller_id']
@@ -60,7 +63,8 @@ def sell() -> Response:
                           tagline=tagline,
                           image_url=image_url,
                           price=price,
-                          seller_id=seller_id)
+                          seller_id=seller_id,
+                          is_active=True)
         db.session.add(product)
         db.session.commit()
     except Exception as e:
@@ -78,7 +82,7 @@ def sell() -> Response:
 
 def _safe_get_product_by_id(id: int) -> Product:
     try:
-        return db.session.query(Product).get(id)
+        return db.session.query(Product).filter_by(id=id, is_active=True).one()
     except Exception as e:
         print(f'Failed Product lookup produced this error: {e}')
         return None
