@@ -11,6 +11,9 @@ import {
 // Component
 
 export default function Product(props) {
+
+  // Editing
+
   let history = useHistory();
 
   const { id } = useParams();
@@ -24,13 +27,40 @@ export default function Product(props) {
       if (data.status === 200) {
         setProduct(data.product);
         setCanEdit(data.product.seller_id === userId);
-      } else {
-        history.push('/market');  // redirect to market if id not in database
       }
+      //  else {
+      //   history.push('/market');  // redirect to market if id not in database
+      // }
     });
   }, [id, userId, history]);
 
   let imageUrl = product && product.image_url ? product.image_url : 'https://via.placeholder.com/300';
+
+  const [showError, setShowError] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    setShowError(error.length !== 0);
+  }, [error]);
+
+  const unlist = () => {
+    fetch(`/products/deactivate/${id}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user_id: props.userId,
+      })
+    }).then(res => res.json()).then(data => {
+      if (data['status'] === 500) {
+        setError(data['error']);
+      } else {
+        setError('');
+        history.push('/market/');
+      }
+    })
+  }
+
+  // Render
 
   return (
     <Container>
@@ -75,7 +105,12 @@ export default function Product(props) {
 
             {
               canEdit
-                ? 'seller actions go here'
+                ?
+                <Card.Body className="d-grid">
+                  <Button variant="outline-danger" onClick={() => unlist()}>
+                    unlist
+                  </Button>
+                </Card.Body>
                 :
                 <Card.Body className="d-grid">
                   <Button variant="outline-primary" onClick={() => props.addToCart(product.id)}>

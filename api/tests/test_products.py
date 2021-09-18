@@ -15,18 +15,18 @@ class ProductsTest(TestCase):
         self.mock_product_seller_id = 1
         db.create_all(app=self.test_app)
 
-    def test_all(self):
+    def test_all(self) -> None:
         endpoint = '/products/'
 
         with self.test_app.test_client() as client:
             # populate db with products to test against
             with self.test_app.app_context():
                 products = []
-
                 for i in range(1, 11):
-                    product = Product(id=i, name=self.mock_product_name)
+                    product = Product(id=i,
+                                      name=self.mock_product_name,
+                                      is_active=True)
                     products.append(product)
-
                 db.session.add_all(products)
                 db.session.commit()
 
@@ -39,7 +39,7 @@ class ProductsTest(TestCase):
             all_products_dup = client.get(endpoint).json
             self.assertDictEqual(all_products_dup, all_products)
 
-    def test_one(self):
+    def test_one(self) -> None:
         with self.test_app.test_client() as client:
             id = 1
             endpoint = f'/products/{id}'
@@ -79,7 +79,7 @@ class ProductsTest(TestCase):
             invalid = client.get(endpoint).json
             self.assertEqual(invalid['status'], 500)
 
-    def test_sell(self):
+    def test_sell(self) -> None:
         endpoint = '/products/sell'
 
         with self.test_app.test_client() as client:
@@ -130,7 +130,8 @@ class ProductsTest(TestCase):
 
             # request with product name, price, and registered seller ID is accepted
             with self.test_app.app_context():
-                user = User(id=1)  # just id is needed
+                user = User(
+                    id=self.mock_product_seller_id)  # just id is needed
                 db.session.add(user)
                 db.session.commit()
             valid = client.post(endpoint,
@@ -148,6 +149,58 @@ class ProductsTest(TestCase):
             with self.test_app.app_context():
                 in_db = db.session.query(Product).get(product_data['id'])
                 self.assertIsNotNone(in_db)
+
+    def test_deactivate(self) -> None:
+        with self.test_app.test_client() as client:
+            id = 1
+            endpoint = f'products/deactivate/{id}'
+
+            print('testing deactivate...')
+            print('testing empty endpoint...')
+            # no empty requests
+            no_data = client.post(endpoint).json
+            self.assertEqual(no_data['status'], 500)
+
+            print('testing unregistered product...')
+            # can't deactivate a product not in the database
+            valid_request = {'user_id': self.mock_product_seller_id}
+            not_stored = client.post(endpoint,
+                                     data=json.dumps(valid_request),
+                                     content_type='application/json').json
+            self.assertEqual(not_stored['status'], 500)
+
+            # create a product in the db to test against
+            with self.test_app.app_context():
+                # a registered user has to exist to create the product
+                user = User(
+                    id=self.mock_product_seller_id)  # just id is needed
+                db.session.add(user)
+
+                product = Product(id=id,
+                                  name=self.mock_product_name,
+                                  seller_id=user.id,
+                                  is_active=True)
+                db.session.add(product)
+                db.session.commit()
+
+            # cannot change product if seller_id != user_id
+            invalid_request = {'user_id': self.mock_product_seller_id + 1}
+            invalid = client.post(endpoint,
+                                  data=json.dumps(invalid_request),
+                                  content_type='application/json').json
+            self.assertEqual(invalid['status'], 500)
+
+            # can successfully deactivate a product if all conditions met
+            valid = client.post(endpoint,
+                                data=json.dumps(valid_request),
+                                content_type='application/json').json
+            self.assertEqual(valid['status'], 200)
+
+            # cannot deactivate an already deactivated product
+            repeat = client.post(endpoint,
+                                 data=json.dumps(valid_request),
+                                 content_type='application/json').json
+            self.assertEqual(repeat['status'], 500)
 
     def tearDown(self) -> None:
         db.drop_all(app=self.test_app)

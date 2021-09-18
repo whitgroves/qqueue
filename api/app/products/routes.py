@@ -11,7 +11,9 @@ from app.utils.web import json_response
 @products.route('/')
 @cross_origin()
 def all() -> Response:
-    products = [p.to_dict() for p in db.session.query(Product).all()]
+    products = [
+        p.to_dict() for p in db.session.query(Product).all() if p.is_active
+    ]
     return json_response(200, products=products)
 
 
@@ -43,7 +45,7 @@ def sell() -> Response:
         # required fields
         error = 'Request must include product name.'
         name = request.json['name']
-        
+
         error = 'Request must include product price.'
         price = request.json['price']
 
@@ -80,9 +82,45 @@ def sell() -> Response:
     return json_response(200, product=product.to_dict())
 
 
+@products.route('/deactivate/<int:id>', methods=['POST'])
+def deactivate(id: int) -> Response:
+    error = 'Something went wrong.'
+
+    try:
+        error = 'Request must include user id.'
+        user_id = request.json['user_id']
+
+        error = 'Could not retrieve product with that id.'
+        product = _safe_get_product_by_id(id)
+        assert product
+
+        error = 'User does not have permission to change that product.'
+        assert product.seller_id == user_id
+
+        error = 'Product is already inactive.'
+        assert product.is_active
+
+        error = 'There was an error while delisting the product.'
+        product.is_active = False
+        db.session.commit()
+    except Exception as e:
+        print(
+            f'Exception encountered during product deactivation: {e} -> {error} -> {request.json}'
+        )
+
+        db.session.rollback()
+        print('DB session rolled back successfully.')
+
+        return json_response(500, error=error)
+
+    return json_response(200)
+
+
 def _safe_get_product_by_id(id: int) -> Product:
     try:
-        return db.session.query(Product).filter_by(id=id, is_active=True).one()
+        product = db.session.query(Product).get(id)
+        assert product.is_active
+        return product
     except Exception as e:
-        print(f'Failed Product lookup produced this error: {e}')
+        print(f'Product lookup failed with this error: {e}')
         return None

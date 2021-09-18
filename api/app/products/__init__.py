@@ -1,5 +1,5 @@
 from flask import Blueprint
-import models
+from . import models
 
 products = Blueprint('products', __name__)
 

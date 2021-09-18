@@ -5,7 +5,7 @@ import Product from './Product';
 
 const testProduct = { id: 1, name: 'Test Product', seller_id: 1 }
 
-test('renders product name', () => {
+test('renders product when not signed in', () => {
   render(
     <MemoryRouter initialEntries={['/product/1']}>
       <Route path='/product/:id'>
@@ -17,4 +17,25 @@ test('renders product name', () => {
   const nameElement = screen.getByTestId('product-name');
   expect(nameElement).toBeInTheDocument();
   expect(nameElement.textContent).toEqual(testProduct.name);
+
+  const addElement = screen.getByText('add to cart +');
+  expect(addElement).toBeInTheDocument();
 });
+
+// // failing b/c no async
+// test('renders product when signed in', () => {
+//   render(
+//     <MemoryRouter initialEntries={['/product/1']}>
+//       <Route path='/product/:id'>
+//         <Product product={testProduct} userId={testProduct.seller_id} />
+//       </Route>
+//     </MemoryRouter>
+//   );
+
+//   const nameElement = screen.getByTestId('product-name');
+//   expect(nameElement).toBeInTheDocument();
+//   expect(nameElement.textContent).toEqual(testProduct.name);
+
+//   const addElement = screen.getByText('add to cart +');
+//   expect(addElement).toBeUndefined();
+// });
